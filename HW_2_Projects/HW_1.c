@@ -1,12 +1,6 @@
-/*
-	TODO: 
-	1. Refactor main()
-	2. need to find out why stdint types not working
-*/
-
 #include "HW_1.h"
 
-char reverse(char *str, int length)
+char reverse(char *str, uint8_t length)
 {
 	char *string_start = str; 
 
@@ -19,7 +13,7 @@ char reverse(char *str, int length)
 		return -1;
 	}
 
-	int rev_iter = 0;
+	int8_t rev_iter = 0;
 	for(rev_iter=(length); rev_iter>=0; rev_iter--) {
 		printf("%c", *(string_start+rev_iter));
 	}
@@ -33,13 +27,13 @@ int main()
 {
 
 	char *string_1 = "This is a string";
-	int length_1 = 15;
+	uint8_t length_1 = 15;
 	char *string_2 = "some NUMmbers12345";
-	int length_2 = 17;
+	uint8_t length_2 = 17;
 	char *string_3 = "Does it reverse \n\0\t correctly?";
-	int length_3 = 28;
+	uint8_t length_3 = 28;
 
-	int ret = 0;
+	int8_t ret = 0;
 	printf("Reversed Strings:\n");
 	ret = reverse(string_1,length_1);
 	if(ret == -1) {
@@ -58,7 +52,7 @@ int main()
 		printf("failed!\n");
 	}
 
-	int cntr = 0;
+	int8_t cntr = 0;
 	printf("Original Strings:\n");
 	while(length_1 >= cntr) {
 		printf("%c", *(string_1+cntr));
@@ -83,4 +77,3 @@ int main()
 
 	return 0;
 }
-

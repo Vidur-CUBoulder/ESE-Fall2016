@@ -1,0 +1,4 @@
+To Compile:
+	make
+To Clean:
+	make clean

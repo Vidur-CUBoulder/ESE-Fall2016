@@ -8,6 +8,6 @@
 /* Takes string and string length as input
  * displays the reversed string as output 
  */
-char reverse(char *str, int length);
+char reverse(char *str, uint8_t length);
 
 #endif
