@@ -1,3 +1,6 @@
+Please note that the makefile is only intended for use on the BeagleBone
+It will only form an ARM executable.
+
 To Compile:
 	make
 To Clean:
