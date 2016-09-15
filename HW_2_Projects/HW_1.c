@@ -15,6 +15,11 @@ char reverse(char *str, uint8_t length)
 
 	int8_t rev_iter = 0;
 	for(rev_iter=(length); rev_iter>=0; rev_iter--) {
+		/* Bypassing escape sequences */
+		if ( *(string_start+rev_iter) == '\n' || \
+		*(string_start+rev_iter) == '\t') {
+			continue;
+		}
 		printf("%c", *(string_start+rev_iter));
 	}
 
