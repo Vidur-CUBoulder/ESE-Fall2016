@@ -1,10 +1,6 @@
-/*
- * TODO : Change the main() function. Or best, remove it
- * completely ?
- */ 
-
 #include "data.h"
 
+/*
 int main()
 {
     int32_t data = 0x23;
@@ -16,11 +12,11 @@ int main()
     return 0;
 
 }
-
+*/
 int8_t *my_itoa(int8_t *str, int32_t data, int32_t base)
 {
     if(str == NULL) {
-        return "Null String";
+        return NULL;
     }
 
     int8_t sign = 0;
@@ -75,11 +71,9 @@ int32_t little_to_big(int32_t data)
 {
     printf("%x\n", data);
 
-    int32_t tmp = 0;
-
     //return (((data << 24) & 0xff000000) | ((data << 8) & 0xff0000) | ((data >> 8) & 0xff00) | ((data >> 24) & 0xff) );
     printf("%x\n",(((data >> 24) & 0xff) | ((data << 8) & 0xff0000) | ((data >> 8) & 0xff00) | ((data << 24) & 0xff000000) ));
-
+    return 0;
 }
 
 void dump_memory(uint8_t *start, uint32_t length)

@@ -1,13 +1,6 @@
 #ifndef _DATA_H_
 #define _DATA_H_
 
-/* Standard header files */
-/* TODO: should this be part of a common .h file for all the programs ? */
-#include<stdio.h>
-#include<stdlib.h>
-#include<stdint.h>
-
-
 /* Function : void dump_memory(uint8_t *start, uint32_t length)
  * Inputs:
  *      uint8_t *start : starting address from which the data should
