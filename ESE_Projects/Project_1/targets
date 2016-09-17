@@ -1,7 +1,0 @@
-preprocess
-asm-file
-compile-all
-build
-upload
-clean
-build-lib
