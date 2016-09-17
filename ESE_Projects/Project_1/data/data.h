@@ -1,6 +1,8 @@
 #ifndef _DATA_H_
 #define _DATA_H_
 
+#include "headers.h"
+
 /* Function : void dump_memory(uint8_t *start, uint32_t length)
  * Inputs:
  *      uint8_t *start : starting address from which the data should

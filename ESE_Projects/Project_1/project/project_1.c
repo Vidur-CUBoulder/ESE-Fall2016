@@ -1,6 +1,6 @@
 #include "project_1.h"
 
-//#define BYTE_8_MEMMOVE
+#define BYTE_8_MEMMOVE
 //#define BYTE_16_MEMMOVE
 //#define REVERSE_32
 
@@ -11,7 +11,7 @@ void project_1_report() {
     uint8_t *aptr_1 = array;
     //printf("%p; %d\n", aptr_1, *aptr_1);
 
-    uint8_t *aptr_2 = (array + 8);
+    //uint8_t *aptr_2 = (array + 8);
     //printf("%p; %d\n", aptr_2, *aptr_2);
    
     uint8_t *aptr_3 = (array + 16); 
@@ -22,8 +22,8 @@ void project_1_report() {
     int8_t cntr = 0;
     for(cntr = 0; cntr<16; cntr++) {
         *(aptr_1 + cntr) = (31 + cntr);
-        //printf("addr: %p; data: %d\n", \
-            (aptr_1 + cntr), *(aptr_1 + cntr)); 
+        /*printf("addr: %p; data: %d\n", \
+            (aptr_1 + cntr), *(aptr_1 + cntr)); */ 
     }
 
     //2. Init from aptr_3 to the end using memzero
@@ -32,7 +32,7 @@ void project_1_report() {
     //OPERATIONS!...
     //1. memmove to move 8 bytes from from aptr_1 to aptr_3
     
-    #ifdef BYTE_8_MEMEMOVE
+    #ifdef BYTE_8_MEMMOVE
 
     int8_t i = 0;
     printf("(BEFORE)Printing the entire array!\n");

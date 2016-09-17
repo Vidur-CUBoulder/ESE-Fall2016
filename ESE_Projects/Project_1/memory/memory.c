@@ -58,8 +58,8 @@ int8_t my_memzero(uint8_t *src, uint32_t length) {
     int i = 0;
     for( i = 0; i<length; i++) {
         *(src+i) = 0x0;
-        //printf("Addr: %p; data: %d\n", \
-            (src+i), *(src+i));
+        /*printf("Addr: %p; data: %d\n", \
+            (src+i), *(src+i));*/
     }
 
     return 0;

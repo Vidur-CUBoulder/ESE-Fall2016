@@ -1,0 +1,5 @@
+-I./data 
+-I./headers 
+-I./memory 
+-I./project 
+-I./main

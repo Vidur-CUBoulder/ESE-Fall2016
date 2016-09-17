@@ -1,25 +1,34 @@
-FILE=./targets
-TARGETS=`cat $(FILE)`
+FILE:=./sources/targets
+TARGETS:=$(shell cat ${FILE})
+
+FILE:=./sources/sources_dirs.mk
+DIR_INCLUDES:=$(shell cat ${FILE})
+
+FILE:=./sources/sources_files.mk
+SOURCES:=$(shell cat ${FILE})
 
 CC=gcc
-CFLAGS=-Wall -std=c99 -g -O0
+#DIR_INCLUDES=-I./data -I./headers -I./memory -I./project -I./main
+CFLAGS=-Wall -std=c99 -g -v -O0 $(DIR_INCLUDES)
 LDFLAGS=-lm
-SOURCES=data.c
-OBJECTS=$(SOURCE:.c=.o)
-EXE_FILE=data
-
-#General Compilation to obtain an exec.
-data: $(OBJECTS)
-	$(CC) $(CFLAGS) $(SOURCES) -o $(EXE_FILE)
+#SOURCES=data/data.c memory/memory.c project/project_1.c main/main.c
+OBJECTS=$(SOURCES:.c=.o)
+HEADERS=$(SOURCES:.c=.h)
+EXE_FILE=executable
 
 .PHONY=$(TARGETS)
 
-#Target Specific Flags
-PREPROCESS_FLAGS= -E
-preprocess: $(OBJECTS)
-	$(CC) $(CFLAGS) $(PREPROCESS_FLAGS) $(SOURCES) -o data.o
+#General Compilation to obtain an exec.
+build: $(HEADERS) $(OBJECTS)
+	$(CC) $(CFLAGS) $(SOURCES) -o $(EXE_FILE)
 
-ASM_FLAGS= -S
-asm-file: $(OBJECTS)
-	$(CC) $(CFLAGS) $(ASM_FLAGS) $(SOURCES) -o data.s
+
+#Target Specific Flags
+#PREPROCESS_FLAGS= -E
+#preprocess: $(OBJECTS)
+#	$(CC) $(CFLAGS) $(PREPROCESS_FLAGS) $(SOURCES) -o data.o
+
+#ASM_FLAGS= -S
+#asm-file: $(OBJECTS)
+#	$(CC) $(CFLAGS) $(ASM_FLAGS) $(SOURCES) -o data.s
 
