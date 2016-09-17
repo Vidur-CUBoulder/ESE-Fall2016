@@ -1,3 +1,5 @@
+#include"project.h"
+
 int main()
 {
     project_1_report();
