@@ -1,18 +1,21 @@
 #include "data.h"
 
-/*
-int main()
+/*int main()
 {
     int32_t data = 0x23;
+    //int8_t *res = NULL;
+
+    //int8_t temp = 10;
+    //int8_t *str = &temp; 
+
     int32_t res = 0;
 
-    res = big_to_little(data);
-    printf("%x\n", res); 
-    
+    res = little_to_big(0x23452358);
+    printf("%x\n", res);  
     return 0;
 
-}
-*/
+}*/
+
 int8_t *my_itoa(int8_t *str, int32_t data, int32_t base)
 {
     if(str == NULL) {
@@ -21,59 +24,83 @@ int8_t *my_itoa(int8_t *str, int32_t data, int32_t base)
 
     int8_t sign = 0;
     int8_t temp_cnt = 0;
+    int8_t cnt = 0;
+    uint8_t i = 0; uint8_t temp = 0;
 
     /* Need to convert the number to a positive one \
        irrespective. We will handle the negative binaries \
        after we have obtained the binary number 
-    */
+     */
     if(data < 0) {
         sign = 1;
         data = data * (-1);
     }
 
-    int8_t cnt = 0;
     while(data != 0) {
-       *(str+cnt) = data % 2;
-        data = data / 2;
+        *(str+cnt) = data % base;
+        data = data / base;
         cnt++;
     }
-    
+
     cnt--;
     temp_cnt = cnt; 
-    uint8_t i = 0; uint8_t temp = 0;
-    for(i=0; i<=((cnt/2)+1); i++) {
+    
+    for(i=0; i<=((cnt/2)); i++) {
         temp = *(str+i);
         *(str+i) = *(str+cnt);
         *(str+cnt) = temp;
         cnt--;
     }
 
-    if( sign == 1 ) {
-        for(i=0; i<=temp_cnt; i++) {
-            *(str+cnt) = ~(*(str+cnt));
-            printf("%d ", *(str+cnt)); 
+    /* 2's Complement for Signed Numbers!(Only Binary) */
+    if( (sign == 1) && (base == 2) ) {
+        for(i=0; i<=(temp_cnt); i++) {
+            (*(str+i) == 1) ? (*(str+i) = 0) : (*(str+i) = 1);  
         } //end of the inverse ops.
-    
+
+        int8_t flip = 0;
+        
+        /* Adding 1 to the 1's complement now */ 
+        for(i=temp_cnt; i>=0; i--) {
+            if(*(str+i) == 1) {
+                flip = 1;
+                if( *(str+i+1) == 0 && flip == 1) {
+                    *(str+i+1) = 1;
+                    flip = 0;
+                    break;
+                } else {
+                    flip = 1;
+                    continue;
+                }
+            } else {
+                (*(str+i)) = 1;
+                break;
+            }
+        }
     }
-
-    printf("\n");
-
+        
     return str;
 }
 
 
 int32_t big_to_little(int32_t data)
 {
-    return (((data >> 24) & 0xff) | ((data << 8) & 0xff0000) | ((data >> 8) & 0xff00) | ((data << 24) & 0xff000000) );
+    int32_t a = ((data << 24) & 0xff000000);
+    int32_t b = ((data << 8) & 0xff0000);
+    int32_t c =((data >> 8) & 0xff00);
+    int32_t d =((data >> 24) & 0xff);
+
+    return (a | b | c | d) ;
 }
 
 int32_t little_to_big(int32_t data)
 {
-    printf("%x\n", data);
+    int32_t a = ((data << 24) & 0xff000000);
+    int32_t b = ((data << 8) & 0xff0000);
+    int32_t c =((data >> 8) & 0xff00);
+    int32_t d =((data >> 24) & 0xff);
 
-    //return (((data << 24) & 0xff000000) | ((data << 8) & 0xff0000) | ((data >> 8) & 0xff00) | ((data >> 24) & 0xff) );
-    printf("%x\n",(((data >> 24) & 0xff) | ((data << 8) & 0xff0000) | ((data >> 8) & 0xff00) | ((data << 24) & 0xff000000) ));
-    return 0;
+    return (a | b | c | d) ;
 }
 
 void dump_memory(uint8_t *start, uint32_t length)

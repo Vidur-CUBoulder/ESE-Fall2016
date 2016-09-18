@@ -1,5 +1,5 @@
 -I./data 
 -I./headers 
 -I./memory 
--I./project 
+-I./project_1 
 -I./main

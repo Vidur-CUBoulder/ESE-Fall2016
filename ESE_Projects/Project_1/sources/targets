@@ -5,3 +5,5 @@ build
 upload
 clean
 build-lib
+objects
+object-dump

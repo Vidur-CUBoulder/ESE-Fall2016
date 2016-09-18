@@ -1,8 +1,80 @@
 Directory Structure Description:
 
+ESE_Projects/
+└── Project_1
+    ├── data
+    │   ├── data.c
+    │   └── data.h
+    ├── headers
+    │   └── headers.h
+    ├── main
+    │   ├── main.c
+    │   └── main.h
+    ├── Makefile
+    ├── memory
+    │   ├── memory.c
+    │   └── memory.h
+    ├── project_1
+    │   ├── project_1.c
+    │   └── project_1.h
+    ├── README
+    ├── sources
+    │   ├── sources_dirs.mk
+    │   ├── sources_files.mk
+    │   └── targets
+    └── upload.sh
 
+sources_dirs.mk : has a list of the relative paths of all the directories that are a part of the project. Any additions in directories at the root level must be updated here. This makes sure that the makefile includes these paths while compiling.
 
+source_files.mk : has a list of the relative paths of all the .c files in the project. Again, the objective here is that the additions and deletions can be easily tracked.
 
+targets : a list of all the .PHONY targets in the makefile. Additions and deletions to be made here.
+
+upload.sh : a bash script that will scp the executable from the host machine to the BeagleBone, provided that the BB is connected and the IP pingable. If the executable file is not present, the script will first invoke make build ARCH=bbb to build the executable. 
+
+Using Make:
+
+1. The makefile by default runs the make for the host system, which in this case is the x86_64.
+
+2. To specify the architecture, please follow the following convention : 
+        $ make <target> ARCH=<host, bbb, frdm>
+
+3. The intermediate files (*.o, *.i, *.S, etc.) will be generated on calling the appropriate target and will be present in their respective directories. For Example, data.o and data.i will be present in the directory data/
+
+4. It is recommended that you call make clean everytime you want to generate a new file. Make by default does not recompile files that have already been compiled.
+
+Targets and their operations:
+
+1. build
+    This target option will compile and link all files and store the execuable in the top level directory. The executable is "./project". This will also produce the .map file and produce size data on project executable.
+
+2. upload
+    This target will upload the executable to the BeagleBone provided that the IP is pingable. Also, if there is no executable, the script will run the makefile to create it and then start the scp.
+
+3. build-lib
+    This target will call the host/cc archiver to create libproject1.a for data.o and memory.o. The file will be stored in the top-level directory.
+
+4. preprocess 
+    This target will create all the .i files in their respective directories.
+
+5. asm-file
+    This target will create all the .S files in their respective directories.
+
+6. objects
+    This target will create all the .o object files in their respective directories.
+
+7. *.o, *.S, *.i
+    You can individually call the respective files for it to create the object, assembler and preprocess for an individual file.
+
+8. clean
+    This target will clean the tree of all the extra files that are created and bring it back to its original state.
+
+9. object-dump
+	This is generate the object dump for whatever file you enter via the INPUT variable
+	For Example, 
+			make object-dump ARCH=<host, bbb, frdm> INPUT=<name of the .o or exe file>
+
+      
 
 
 
