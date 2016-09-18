@@ -16,6 +16,7 @@ SOURCES:=$(shell cat ${FILE})
 
 ARCH:=
 INPUT:=
+COMPILETIME_SWITCH:=
 
 ifndef ARCH
 ARCH:=host
@@ -63,7 +64,7 @@ ASM_FILES:=$(SOURCES:%.c=%.S)
 .PHONY=$(TARGETS)
 
 build: $(OBJECTS) $(SOURCES)
-	$(CC) $(CFLAGS) $(MAP_FLAGS) $(SOURCES) -o $(EXE_FILE)
+	$(CC) -D$(COMPILETIME_SWITCH) $(CFLAGS) $(MAP_FLAGS) $(SOURCES) -o $(EXE_FILE)
 	$(SIZE) ./$(EXE_FILE)
 
 object-dump: $(OBJECTS) $(SOURCES)

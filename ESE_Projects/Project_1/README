@@ -1,3 +1,11 @@
+CAVEATS:
+
+1. You will have to use the compile time switch option to see the outputs for the different options within projec_1.c.
+Syntax:
+	$ make build COMPILETIME_SWITCH=<REVERSE32, BYTE_8_MEMMOVE, BYTE_16_MEMMOVE> ARCH=<host, bbb, frdm>
+
+Only the 3 compiletime option switches for project_1.c will compile properly. 
+
 Directory Structure Description:
 
 ESE_Projects/

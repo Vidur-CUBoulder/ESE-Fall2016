@@ -32,6 +32,6 @@ int8_t my_memzero(uint8_t *src, uint32_t length);
  * Output:
  *      returns a success/failure handle
  */ 
-int8_t my_reverse(int8_t *src, uint8_t length);
+int8_t my_reverse(uint8_t *src, uint8_t length);
 
 #endif

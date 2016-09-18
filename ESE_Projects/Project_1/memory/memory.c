@@ -21,9 +21,9 @@ int main() {
 }
 */
 
-int8_t my_reverse(int8_t *src, uint8_t length)
+int8_t my_reverse(uint8_t *src, uint8_t length)
 {
-	int8_t *string_start = src; 
+	uint8_t *string_start = src; 
 
 	/* Adding checks for corner cases */
 	if ( length <= 0) {
