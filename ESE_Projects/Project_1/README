@@ -6,6 +6,8 @@ Syntax:
 
 2. Please refer to the instructions for object-dump target defined below. You must follow that syntax to get the correct output.
 
+3. The compile time switch by default is set to COMPILE_PROJECT_1. You may change this in the command line by passing a new switch to COMPILETIME_SWITCH parameter. However, doing so presently will get you no observable output.
+
 Directory Structure Description:
 
 ESE_Projects/
