@@ -14,9 +14,14 @@ SOURCES:=$(shell cat ${FILE})
 #from the command line interface. If no variable
 #is passed, assume the default to be host
 
+#Input Var. to the compile time switch.
+COMPILETIME_SWITCH:=COMPILE_PROJECT_1
+
+#Input Var. to define the architecture
 ARCH:=
+
+#Input Var. for the object-dump target
 INPUT:=
-COMPILETIME_SWITCH:=
 
 ifndef ARCH
 ARCH:=host
@@ -64,7 +69,7 @@ ASM_FILES:=$(SOURCES:%.c=%.S)
 .PHONY=$(TARGETS)
 
 build: $(OBJECTS) $(SOURCES)
-	$(CC) -D$(COMPILETIME_SWITCH) $(CFLAGS) $(MAP_FLAGS) $(SOURCES) -o $(EXE_FILE)
+	$(CC) $(CFLAGS) -D$(COMPILETIME_SWITCH) $(MAP_FLAGS) $(SOURCES) -o $(EXE_FILE)
 	$(SIZE) ./$(EXE_FILE)
 
 object-dump: $(OBJECTS) $(SOURCES)
@@ -75,6 +80,7 @@ upload:$(OBJECTS)
 
 build-lib:memory.o data.o
 	$(ARCHIVER) rcs $(AR_FILE) memory/memory.o data/data.o
+	@chmod 776 $(AR_FILE)
 	@file $(AR_FILE)
 
 preprocess: memory.i project_1.i data.i main.i
@@ -124,4 +130,4 @@ project_1.S:project_1/project_1.c
 	$(CC) $(CFLAGS) -S project_1/project_1.c -o project_1/project_1.S
 
 clean:
-	-rm -rf $(EXE_FILE) $(OBJECTS) $(OBJDUMP_FILE) $(MAP_FILE) $(PRE_PROCESSED) $(ASM_FILES)
+	-rm -rf $(EXE_FILE) $(OBJECTS) $(AR_FILE) $(OBJDUMP_FILE) $(MAP_FILE) $(PRE_PROCESSED) $(ASM_FILES)

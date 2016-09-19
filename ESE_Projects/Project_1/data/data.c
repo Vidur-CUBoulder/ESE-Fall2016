@@ -1,24 +1,8 @@
 #include "data.h"
 
-/*int main()
-{
-    int32_t data = 0x23;
-    //int8_t *res = NULL;
-
-    //int8_t temp = 10;
-    //int8_t *str = &temp; 
-
-    int32_t res = 0;
-
-    res = little_to_big(0x23452358);
-    printf("%x\n", res);  
-    return 0;
-
-}*/
-
 int8_t *my_itoa(int8_t *str, int32_t data, int32_t base)
 {
-    if(str == NULL) {
+    if(str == NULL || base != 2 || base != 8 || base != 16) {
         return NULL;
     }
 
@@ -111,7 +95,8 @@ void dump_memory(uint8_t *start, uint32_t length)
 
     uint8_t i = 0;
     while (i != length) {
-        printf("%p; 0x%.2x\n", (start+i), *(start+i));
+        //printf("%p; 0x%.2x\n", (start+i), *(start+i));
+        printf("%p; %d\n", (start+i), *(start+i));
         i++;
     }
 
@@ -140,7 +125,7 @@ int32_t my_atoi(uint8_t *str)
     }
     
     int i= 0; int pow = 1;
-    for(i=(cntr-1); i>0; i--) {
+    for(i=(cntr-1); i>=0; i--) {
         temp = temp + ((*(str+i) - '0') * pow);
         pow = pow * 10;
     }

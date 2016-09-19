@@ -3,8 +3,12 @@
 
 #include"headers.h"
 #include"memory.h"
+#include"data.h"
 
-/* Enter the function description here! */
+/* Function : void project_1_report()
+ * Inputs: NONE. This only an invocation
+ * Output: prints the output of project_1
+ */ 
 void project_1_report();
 
 #endif

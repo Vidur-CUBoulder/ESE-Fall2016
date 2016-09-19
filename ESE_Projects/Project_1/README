@@ -1,10 +1,10 @@
 CAVEATS:
 
-1. You will have to use the compile time switch option to see the outputs for the different options within projec_1.c.
+1. You will have to use the below syntax to a build
 Syntax:
-	$ make build COMPILETIME_SWITCH=<REVERSE32, BYTE_8_MEMMOVE, BYTE_16_MEMMOVE> ARCH=<host, bbb, frdm>
+	$ make build ARCH=<host, bbb, frdm>
 
-Only the 3 compiletime option switches for project_1.c will compile properly. 
+2. Please refer to the instructions for object-dump target defined below. You must follow that syntax to get the correct output.
 
 Directory Structure Description:
 
@@ -51,7 +51,7 @@ Using Make:
 
 4. It is recommended that you call make clean everytime you want to generate a new file. Make by default does not recompile files that have already been compiled.
 
-Targets and their operations:
+Targets & Their Operations:
 
 1. build
     This target option will compile and link all files and store the execuable in the top level directory. The executable is "./project". This will also produce the .map file and produce size data on project executable.
@@ -80,9 +80,11 @@ Targets and their operations:
 9. object-dump
 	This is generate the object dump for whatever file you enter via the INPUT variable
 	For Example, 
-			make object-dump ARCH=<host, bbb, frdm> INPUT=<name of the .o or exe file>
+			make object-dump ARCH=<host, bbb, frdm> INPUT=<name of the .o or exe file, path relative from the root>
+			make object-dump ARCH=host INPUT=data/data.o
 
-      
+Future Enhancements:
 
+1. Need to re-modify the makefile to do recursive make.
 
-
+2. Provide a global function that will make sense of error return values.      

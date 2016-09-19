@@ -1,25 +1,35 @@
 #include "memory.h"
 
-/*
-int main() {
+/*int main() {
 
-    uint8_t arr_1[] = { 'h', 'e', 'l', 'l', 'o', ' ', 't', 'h', 'e', 'r', 'e', '\0' };
-    uint8_t len = 11;
-
+    uint8_t arr_1[] = { 214, 63, 12, 52, 2 };
+    uint8_t arr_2[] = { 14, 6, 102, 152, 12 };
+    
     int8_t res = 0;
 
-    printf("(PRE) %d %d %d %d %d\n", arr_1[0], \
+    printf("(PRE)(arr_1): %d %d %d %d %d\n", arr_1[0], \
             arr_1[1], arr_1[2], arr_1[3], arr_1[4]);
     
-    res = my_reverse(arr_1, 11);
+    printf("(PRE)(arr_2): %d %d %d %d %d\n", arr_2[0], \
+            arr_2[1], arr_2[2], arr_2[3], arr_2[4]);
 
-    printf("(PRE) %d %d %d %d %d\n", arr_1[0], \
+    printf("\n");
+    res = my_memmove(arr_1,arr_1, 5);
+    printf("ret: %d\n", res);
+    if (res == -1){
+        exit(0);
+    }
+
+    printf("(POST)(arr_1) %d %d %d %d %d\n", arr_1[0], \
             arr_1[1], arr_1[2], arr_1[3], arr_1[4]);
+    
+    printf("(POST)(arr_2) %d %d %d %d %d\n", arr_2[0], \
+            arr_2[1], arr_2[2], arr_2[3], arr_2[4]);
 
 
     return 0;
-}
-*/
+}*/
+
 
 int8_t my_reverse(uint8_t *src, uint8_t length)
 {
@@ -54,12 +64,14 @@ int8_t my_memzero(uint8_t *src, uint32_t length) {
     if (src == NULL) {
         return -1;
     }
+    
+    if(length <= 0) {
+        return -1;
+    }
 
     int i = 0;
     for( i = 0; i<length; i++) {
         *(src+i) = 0x0;
-        /*printf("Addr: %p; data: %d\n", \
-            (src+i), *(src+i));*/
     }
 
     return 0;
@@ -71,6 +83,10 @@ int8_t my_memmove(uint8_t *src, uint8_t *dst, uint32_t length) {
         return -1;
     }
 
+    if(length <= 0) {
+        return -1;
+    }
+
     int i = 0;
     for (i = 0; i<length; i++) {
         /* Return if there is a mem overlap */
@@ -79,6 +95,7 @@ int8_t my_memmove(uint8_t *src, uint8_t *dst, uint32_t length) {
         }
 
         *(dst+i) = *(src+i);
+        *(src+i) = 0; 
     }
 
     return 0;
