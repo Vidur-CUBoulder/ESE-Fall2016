@@ -95,8 +95,7 @@ void dump_memory(uint8_t *start, uint32_t length)
 
     uint8_t i = 0;
     while (i != length) {
-        //printf("%p; 0x%.2x\n", (start+i), *(start+i));
-        printf("%p; %d\n", (start+i), *(start+i));
+        printf("Addr.: %p; Value: 0x%.2x\n", (start+i), *(start+i));
         i++;
     }
 

@@ -1,36 +1,5 @@
 #include "memory.h"
 
-/*int main() {
-
-    uint8_t arr_1[] = { 214, 63, 12, 52, 2 };
-    uint8_t arr_2[] = { 14, 6, 102, 152, 12 };
-    
-    int8_t res = 0;
-
-    printf("(PRE)(arr_1): %d %d %d %d %d\n", arr_1[0], \
-            arr_1[1], arr_1[2], arr_1[3], arr_1[4]);
-    
-    printf("(PRE)(arr_2): %d %d %d %d %d\n", arr_2[0], \
-            arr_2[1], arr_2[2], arr_2[3], arr_2[4]);
-
-    printf("\n");
-    res = my_memmove(arr_1,arr_1, 5);
-    printf("ret: %d\n", res);
-    if (res == -1){
-        exit(0);
-    }
-
-    printf("(POST)(arr_1) %d %d %d %d %d\n", arr_1[0], \
-            arr_1[1], arr_1[2], arr_1[3], arr_1[4]);
-    
-    printf("(POST)(arr_2) %d %d %d %d %d\n", arr_2[0], \
-            arr_2[1], arr_2[2], arr_2[3], arr_2[4]);
-
-
-    return 0;
-}*/
-
-
 int8_t my_reverse(uint8_t *src, uint8_t length)
 {
 	uint8_t *string_start = src; 
