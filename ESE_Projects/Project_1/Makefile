@@ -15,7 +15,7 @@ SOURCES:=$(shell cat ${FILE})
 #is passed, assume the default to be host
 
 #Input Var. to the compile time switch.
-COMPILETIME_SWITCH:=COMPILE_PROJECT_1
+#COMPILETIME_SWITCH:=COMPILE_PROJECT_1
 
 #Input Var. to define the architecture
 ARCH:=
@@ -48,7 +48,7 @@ endif
 #Freedom Freescale Specific Flags and Variables
 ifeq ($(ARCH),frdm)
 CC:=arm-none-eabi-gcc
-CFLAGS:=-Wall -std=c99 -g -O0 --specs=nosys.specs $(DIR_INCLUDES)
+CFLAGS:=-Wall -std=c99 -g -mthumb -O0 --specs=nosys.specs $(DIR_INCLUDES)
 ARCHIVER:=arm-linux-gnueabihf-ar
 OBJ_DUMP:=arm-none-eabi-objdump
 SIZE:=arm-none-eabi-size

@@ -1,4 +1,6 @@
+
 #include "data.h"
+#include "stdlib.h"
 
 int8_t *my_itoa(int8_t *str, int32_t data, int32_t base)
 {
@@ -13,7 +15,7 @@ int8_t *my_itoa(int8_t *str, int32_t data, int32_t base)
 
     /* Need to convert the number to a positive one \
        irrespective. We will handle the negative binaries \
-       after we have obtained the binary number 
+       after we have obtained the binary number
      */
     if(data < 0) {
         sign = 1;
@@ -27,8 +29,8 @@ int8_t *my_itoa(int8_t *str, int32_t data, int32_t base)
     }
 
     cnt--;
-    temp_cnt = cnt; 
-    
+    temp_cnt = cnt;
+
     for(i=0; i<=((cnt/2)); i++) {
         temp = *(str+i);
         *(str+i) = *(str+cnt);
@@ -39,12 +41,12 @@ int8_t *my_itoa(int8_t *str, int32_t data, int32_t base)
     /* 2's Complement for Signed Numbers!(Only Binary) */
     if( (sign == 1) && (base == 2) ) {
         for(i=0; i<=(temp_cnt); i++) {
-            (*(str+i) == 1) ? (*(str+i) = 0) : (*(str+i) = 1);  
+            (*(str+i) == 1) ? (*(str+i) = 0) : (*(str+i) = 1);
         } //end of the inverse ops.
 
         int8_t flip = 0;
-        
-        /* Adding 1 to the 1's complement now */ 
+
+        /* Adding 1 to the 1's complement now */
         for(i=temp_cnt; i>=0; i--) {
             if(*(str+i) == 1) {
                 flip = 1;
@@ -61,7 +63,7 @@ int8_t *my_itoa(int8_t *str, int32_t data, int32_t base)
             }
         }
     }
-        
+
     return str;
 }
 
@@ -101,7 +103,7 @@ void dump_memory(uint8_t *start, uint32_t length)
     return;
 
 }
-   
+
 int32_t my_atoi(uint8_t *str)
 {
     if(str == NULL) {
@@ -109,7 +111,7 @@ int32_t my_atoi(uint8_t *str)
     }
 
     uint8_t cntr = 0;
-    int sign = 1;
+    int8_t sign = 1;
     uint32_t temp = 0;
 
     if (*str == '-') {
@@ -119,9 +121,9 @@ int32_t my_atoi(uint8_t *str)
 
     //Determining the length of the array.
     while (*(str+cntr) != '\0') {
-        cntr++; 
+        cntr++;
     }
-    
+
     int i= 0; int pow = 1;
     for(i=(cntr-1); i>=0; i--) {
         temp = temp + ((*(str+i) - '0') * pow);
@@ -133,3 +135,4 @@ int32_t my_atoi(uint8_t *str)
 
     return temp;
 }
+
