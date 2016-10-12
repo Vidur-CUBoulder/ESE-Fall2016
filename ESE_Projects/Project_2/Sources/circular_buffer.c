@@ -107,39 +107,3 @@ enum Buffer_States Print_Buffer(struct buffer *buf)
 
     return SUCCESS;
 }
-
-/*int main()
-{
-    struct buffer buf;
-    uint8_t temp_1 = 10;
-    uint8_t temp_2 = 20;
-    uint8_t temp_3 = 30;
-    uint8_t temp_4 = 50;
-    uint8_t temp_5 = 60;
-    uint8_t out = 0;
-
-    Init_Buffer(&buf, 4);
-
-    Add_to_Buffer(&buf, &temp_1);
-    Add_to_Buffer(&buf, &temp_2);
-    Add_to_Buffer(&buf, &temp_3);
-    Add_to_Buffer(&buf, &temp_4);
-
-    //Remove_from_Buffer(&buf, &out);
-    //printf("out: %d\n", out);
-
-    //Add_to_Buffer(&buf, &temp_5);
-    //Remove_from_Buffer(&buf, &out);
-    //printf("out: %d\n", out);
-
-    //Add_to_Buffer(&buf, &temp_5);
-    //Add_to_Buffer(&buf, &temp_5);
-    Print_Buffer(&buf);
-
-
-    Free_Buffer(&buf);
-
-    return 0;
-}*/
-
-
