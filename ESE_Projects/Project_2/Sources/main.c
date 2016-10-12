@@ -30,61 +30,47 @@
 
 #include "main.h"
 
-/* Setting the Global Clock Configurations to pre-defined values
- * Please refer to system_MKL25Z4.h for more information on this.*/
-//#define CLOCK_SETUP 1
-
-#define BLINK_LED
+#ifdef BBB
+#define MY_LOG() printf
+#endif
 
 int main(void)
 {
 
-#ifdef TRIAL_SNIPPET
-	init_uart();
-	config_transmit();
-
-	while(1) {
-		wait_for_buffer_empty();
-		UART0_D = 'Y';
-		int i = 0;
-		int j = 0;
-		for(i=0; i<2; i++){
-			for(j=0; j<7000; j++) {
-				/*delay*/
-			}
-		}
-		//disable_Tx_Rx();
-	}
-#endif
-
 #ifdef LOG_ENABLED
 
-	char *data = "Testing123, Serial Print Test, no params";
+	char *data = "Testing123, Serial Print Test, no params\n";
+	MY_LOG(data);
 
-	MY_LOG(data, strlen(data));
+	MY_LOG_PARAMS("This is an integer number: ", 200);
+	MY_LOG("\n");
+	MY_LOG_PARAMS("This is an integer number: ", 4096);
+	MY_LOG("\n");
+	MY_LOG_PARAMS("This is an integer number: ", 123456);
+	MY_LOG("\n");
+
+
+	#ifdef ENABLE_FOR_FLOAT
+		MY_LOG_FLOAT_PARAMS("This is a floating point number: ", 1543.321, 4);
+	#endif
 
 #endif
 
 #ifdef BLINK_LED
 
-	__disable_irq();
-
 	init_uart();
 	config_receive();
-
 	config_leds();
-
-	__enable_irq();
 
 	int counter = 0;
 	char input;
+	int pulsewidth = 0;
 
 	while(1) {
-		/* Read from the console */
-		//while( (UART0_S1 | 0x20) == 0xE0 ) {
-			//delay(10);
-			input = UART0_D;
-		//}
+
+		while(!(UART0->S1 & 0x20)) {
+		}
+		input = UART0->D;
 
 		if(input == 'd') {
 			counter++;
@@ -92,61 +78,170 @@ int main(void)
 		else if(input == 'a'){
 			counter--;
 		} else {
-			/* Reset the counter */
+			//Reset the counter
 			counter = 0;
 		}
-	turn_on_leds(counter);
+		turn_on_leds(counter);
+
 	}
 #endif
 
+#ifdef PWM_ADJUST
+
+	/* Initialize the UART */
+	init_uart();
+
+	/* Config the UART to receive */
+	config_receive();
+
+	char input;
+	uint16_t pulsewidth = 0;
+
+	while(1) {
+
+		while(!(UART0->S1 & 0x20)) {
+		}
+		input = UART0->D;
+
+		if(input == 'w') {
+			pulsewidth+=300;
+		}
+		else if(input == 's') {
+				pulsewidth -= 300;
+		} else {
+			/* turn off the LED */
+			pulsewidth = 0;
+		}
+
+#ifdef BLUE_LED
+		init_PWM_Blue(pulsewidth);
+#endif
+
+#ifdef RED_LED
+		init_PWM_Red(pulsewidth);
+#endif
+
+#ifdef GREEN_LED
+		init_PWM_Green(pulsewidth);
+#endif
+
+}
+#endif
+
 #ifdef PROFILER
-	char *data = "Hello There!";
+
+#ifdef FRDM_BUF
+
+	double sys_clock = 0.047; // in microsecs
+	double count, net_time;
+
 	counter_init();
 
+	struct buffer buf;
+	int8_t data = 10;
+	int8_t out = 0;
+
 	start_counter();
-	delay(600);
+	Init_Buffer(&buf, 10);
 	stop_counter();
+	count = TPM0_CNT;
+	net_time = count * sys_clock;
+	count = 0;
+	net_time = 0;
+
+	start_counter();
+	Add_to_Buffer(&buf, &data);
+	stop_counter();
+	count = TPM0_CNT;
+	net_time = count * sys_clock;
+	count = 0;
+	net_time = 0;
+
+	start_counter();
+	Remove_from_Buffer(&buf, &out);
+	stop_counter();
+	count = TPM0_CNT;
+	net_time = count * sys_clock;
+	count = 0;
+	net_time = 0;
+
+	start_counter();
+	Free_Buffer(&buf);
+	stop_counter();
+	count = TPM0_CNT;
+	net_time = count * sys_clock;
+	count = 0;
+	net_time = 0;
+
+#endif
+
+
+#ifdef FRDM
+	/* HardSet the default system clock in micro seconds */
+	double sys_clock = 0.047; // in microsecs
+	double count, net_time;
+
+	char *src = "Testing123, Serial Print Test, no params";
+	counter_init();
+
+	char *res = NULL;
+	res = (char *)malloc(sizeof(char)*15);
+
+	//Reset the counter register
+	TPM0_CNT = 0x00000000;
+
+	/* Profiling for custom function */
+	start_counter();
+	my_ftoa(123.524, res, 3);
+	stop_counter();
+
+	count = TPM0_CNT;
+
+	net_time = count * sys_clock;
+
+	free(res);
+	free(src);
+#endif
+
+#ifdef BBB
+
+	struct timeval before, after;
+
+	gettimeofday(&before, NULL);
+
+	MY_LOG("Hello There!\n");
+
+	gettimeofday(&after, NULL);
+
+	printf("Time Taken(microsecs): %lf\n", (double)time_diff(before, after));
+
+#endif
 
 #endif
 
 //Circular Buffer Integration.
-#ifdef CIRC_BUF
 
-__disable_irq();
+#ifdef CIRC_BUF_1
 
-init_uart();
-
-config_receive();
-config_transmit();
-
-//struct buffer buf;
-
-//Init_Buffer(&buf, 4);
-
-__enable_irq();
-
-char ch, out;
-
-while(1) {
-
-		while( (UART0_S1 | 0x20) == 0xE0 ) {
-			ch = UART0_D;
-		}
-
-//		Add_to_Buffer(&buf, &ch);
-
-//		Remove_from_Buffer(&buf, &out);
-
-		wait_for_buffer_empty();
-		UART0_D = out;
-
-		if(out == 'e') {
-			//Free_Buffer(&buf);
-			return 0;
-		}
-	}
+	uint8_t size = 3;
+	/* This is the working function for circular buffer */
+	LOG_BUFFER(size);
 
 #endif
+
+#ifdef TEST_CIRCULAR_BUFFER
+
+	MY_LOG("Testing for Buffer Full!\n");
+	test_buffer_full(5, 4);
+	MY_LOG("Testing for Buffer Empty!\n");
+	test_buffer_empty(5, 3, 4);
+	MY_LOG("Testing for Buffer Overflow!\n");
+	test_buffer_overflow(3, 4);
+	MY_LOG("Testing for remove on empty buffer\n");
+	test_empty_remove();
+
+#endif
+
 
 return 0;
 }

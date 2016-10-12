@@ -104,3 +104,121 @@ void turn_on_leds(uint8_t select)
 						turn_off_all_leds();
 	}
 }
+
+
+void init_PWM_Blue(uint16_t pulse)
+{
+	int pulsewidth = 0;
+
+		/* 1. Enable PORT D from the clock gating control register */
+		SIM->SCGC5 |= 0x00001000;
+
+		/* 2. Select the alternative for the Blue LED*/
+		PORTD->PCR[1] = 0x0400;
+
+		/* 3. Enable TPM0 from the clock gating control register */
+		SIM->SCGC6 = 0x01000000;
+
+		/* 4. Select the clock source for TPM0 */
+		SIM->SOPT2 |= 0x01000000;
+
+		/* 5. Clear the status and control register before beginning */
+		TPM0->SC = 0;
+
+		/* 6. Modify the channel status and control register
+		 * 	a. ELSB and ELSA : 11 : set on match-up and clear on match-down
+		 * 	b. MSB and MSA : 10 : Channel Mode Select
+		 */
+		TPM0->CONTROLS[1].CnSC = 0x2C;
+
+		/* 7. Set the maximum modulus value */
+		TPM0->MOD = 0xFFFF;
+
+		/* 8. Configure the timer to increment on every counter clock */
+		TPM0->SC = 0x08;
+
+		/* 9. CnV value directly controls the pulse width of the timer
+		 * modifying this will lead to an increase in the brightness of the LEDs*/
+		TPM0->CONTROLS[1].CnV = pulse;
+
+		return;
+}
+
+
+void init_PWM_Red(uint16_t pulse)
+{
+	int pulsewidth = 0;
+
+	/* 1. Enable PORT B from the system control register */
+	SIM->SCGC5 |= 0x00000400;
+
+	/* 2. Select the alternative for the RED LED */
+	PORTB->PCR[18] |= 0x00000300;
+
+	/* 3. Enable TPM2 from the system clock gating registers */
+	SIM->SCGC6 = 0x04000000;
+
+	/* 4. Select the clock source for TPM2 */
+	SIM->SOPT2 |= 0x01000000;
+
+	/* 5. Clear the status and control register before beginning */
+	TPM2->SC = 0;
+
+	/* 6. Modify the channel status and control register
+	 * 	a. ELSB and ELSA : 11 : set on match-up and clear on match-down
+	 * 	b. MSB and MSA : 10 : Channel Mode Select
+	 */
+	TPM2->CONTROLS[0].CnSC = 0x2C;
+
+	/* 7. Set the maximum modulus value */
+	TPM2->MOD = 0xFFFF;
+
+	/* 8. Configure the timer to increment on every counter clock */
+	TPM2->SC = 0x08;
+
+	/* 9. CnV value directly controls the pulse width of the timer
+	 * modifying this will lead to an increase in the brightness of the LEDs*/
+	TPM2->CONTROLS[0].CnV = pulse;
+
+	return;
+}
+
+
+void init_PWM_Green(uint16_t pulse)
+{
+	int pulsewidth = 0;
+
+	/* 1. Enable PORTB from the system control register */
+	SIM->SCGC5 |= 0x00000400;
+
+	/* 2. Select the alternative for the Green LED */
+	PORTB->PCR[19] |= 0x00000300;
+
+	/* 3. Enable TPM2 from the system clock gating registers */
+	SIM->SCGC6 = 0x04000000;
+
+	/* 4. Select the clock source for TPM2 */
+	SIM->SOPT2 |= 0x01000000;
+
+	/* 5. Clear the status and control register before beginning */
+	TPM2->SC = 0;
+
+	/* 6. Modify the channel status and control register
+	 * 	a. ELSB and ELSA : 11 : set on match-up and clear on match-down
+	 * 	b. MSB and MSA : 10 : Channel Mode Select
+	 */
+	TPM2->CONTROLS[1].CnSC = 0x2C;
+
+	/* 7. Set the maximum modulus value */
+	TPM2->MOD = 0xFFFF;
+
+	/* 8. Configure the timer to increment on every counter clock */
+	TPM2->SC = 0x08;
+
+	/* 9. CnV value directly controls the pulse width of the timer
+	 * modifying this will lead to an increase in the brightness of the LEDs*/
+	TPM2->CONTROLS[1].CnV = pulse;
+
+	return;
+}
+

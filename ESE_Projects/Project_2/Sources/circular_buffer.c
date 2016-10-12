@@ -31,7 +31,7 @@ enum Buffer_States Buffer_Overflow(struct buffer *buf)
         return NULL_VALUE;
     }
 
-    if ( (buf->tail > buf->buffer_end) /*&& (buf->head > buf->buffer_start)*/ ) {
+    if ( (buf->tail > buf->buffer_end) ) {
         printf("Overflow!\n");
         buf->tail = buf->buffer_start;
 

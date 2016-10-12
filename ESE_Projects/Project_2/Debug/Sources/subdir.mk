@@ -5,7 +5,9 @@
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
 ../Sources/circular_buffer.c \
+../Sources/circular_buffer_test.c \
 ../Sources/data.c \
+../Sources/ftoa.c \
 ../Sources/led.c \
 ../Sources/log.c \
 ../Sources/main.c \
@@ -15,7 +17,9 @@ C_SRCS += \
 
 OBJS += \
 ./Sources/circular_buffer.o \
+./Sources/circular_buffer_test.o \
 ./Sources/data.o \
+./Sources/ftoa.o \
 ./Sources/led.o \
 ./Sources/log.o \
 ./Sources/main.o \
@@ -25,7 +29,9 @@ OBJS += \
 
 C_DEPS += \
 ./Sources/circular_buffer.d \
+./Sources/circular_buffer_test.d \
 ./Sources/data.d \
+./Sources/ftoa.d \
 ./Sources/led.d \
 ./Sources/log.d \
 ./Sources/main.d \

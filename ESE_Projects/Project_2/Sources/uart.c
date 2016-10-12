@@ -101,11 +101,11 @@ void delay(uint8_t value)
 	}
 }
 
-void UART0_IRQHandler()
+/*void UART0_IRQHandler()
 {
-	/* 1. Enable the Receiver Interrupt on the UART0 Control Register */
+	// 1. Enable the Receiver Interrupt on the UART0 Control Register
 	UART0_C2 |= 0x20;
 
-	/* 2. Enable the NVIC ISQ for UART0 */
+	// 2. Enable the NVIC ISQ for UART0
 	NVIC->ISER[0] = 0x00001000;
-}
+}*/

@@ -8,6 +8,8 @@
 #include "timer.h"
 #include "MKL25Z4.h"
 
+//#define BBB
+
 /* Configure the counter register */
 
 void counter_init()
@@ -41,6 +43,8 @@ void counter_init()
 
 void start_counter()
 {
+	TPM0_CNT = 0x00000000;
+
 	/* This will start the TPM counter */
 	TPM0_SC = 0x08;
 }
@@ -50,3 +54,16 @@ void stop_counter()
 	/* Stop the counter! */
 	TPM0_SC = 0x00;
 }
+
+#ifdef BBB
+
+double time_diff(struct timeval before, struct timeval after)
+{
+	double x_ms, y_ms;
+
+	x_ms = (double)before.tv_sec*1000000 + (double)(before.tv_usec);
+	y_ms = (double)after.tv_sec*1000000 + (double)(after.tv_usec);
+
+	return (y_ms - x_ms); /* output in microseconds */
+}
+#endif
