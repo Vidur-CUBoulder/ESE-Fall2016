@@ -30,7 +30,7 @@ endif
 #_x86_64 Specific Flags and Variables
 ifeq ($(ARCH),host) 
 CC:=gcc
-CFLAGS:=-Wall -std=c99 -g -O0 $(DIR_INCLUDES)
+CFLAGS=-Wall -std=c99 -g -O0 $(DIR_INCLUDES)
 ARCHIVER:=ar
 OBJ_DUMP:=objdump
 SIZE:=size
@@ -49,7 +49,7 @@ endif
 ifeq ($(ARCH),frdm)
 CC:=arm-none-eabi-gcc
 CFLAGS:=-Wall -std=c99 -g -mthumb -O0 --specs=nosys.specs $(DIR_INCLUDES)
-ARCHIVER:=arm-linux-gnueabihf-ar
+ARCHIVER:=arm-linux-gnueabi-ar
 OBJ_DUMP:=arm-none-eabi-objdump
 SIZE:=arm-none-eabi-size
 endif
