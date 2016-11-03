@@ -46,22 +46,14 @@ void init_uart()
 void config_receive()
 {
 	/* Enable Receive.*/
-	//UART0_C2 |= SET_RX_FLAG;
-
-	UART0->C2 = 0x24;
-
-	NVIC_EnableIRQ(12);
+	UART0_C2 |= 0x04;
 
 	/* Setting the Pin Control Register for PORTA.
 	 * For Pin Mux ALT2,
 	 * 		UART0_RX = PTA1
 	 * 		UART0_TX = PTA2
 	 */
-	PORTA_PCR1 |= SELECT_ALT2_PORTA;
-
-	PORTA_PCR1 |= 0x000a0000;//falling edge interrupt
-
-	UART0->S1 &= 0xdf;
+	PORTA_PCR1 = 0x00000200;
 }
 
 void disable_Tx_Rx()

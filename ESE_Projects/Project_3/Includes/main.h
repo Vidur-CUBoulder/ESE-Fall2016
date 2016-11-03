@@ -13,5 +13,6 @@
 #include "error_handling.h"
 #include "log.h"
 #include "timer.h"
+#include "parse_data.h"
 
 #endif /* INCLUDES_MAIN_H_ */

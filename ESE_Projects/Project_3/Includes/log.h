@@ -13,6 +13,8 @@
 
 void MY_LOG(char *data);
 
+void MY_LOG_LEN(char *data, uint32_t length);
+
 void LOG_BUFFER(uint8_t size);
 
 void MY_LOG_PARAMS(char *data, uint32_t param);

@@ -46,9 +46,22 @@ int main(void)
 
 	spi_init();
 
-
 #endif
 
+#ifdef MSG_STRUCT
+
+	CLI command_in;
+	uint32_t command_length = 0;
+	char data[40];
+
+	/* Enter the CLI on the console */
+	get_CLI(&data[0], &command_in.cmd_length);
+
+	parse_CLI(data, &command_in);
+
+	act_on_command(&command_in);
+
+#endif
 
 
 #ifdef dma_test
@@ -96,7 +109,11 @@ int main(void)
 	/* Process clock for PORT A*/
 	SIM->SCGC5 |= 0x0200;
 
-	SIM->SOPT2 |= 0x0
+	/* Set UART0SRC */
+	SIM->SOPT2 |= 0x04000000;
+
+	/* Disable Tx/Rx */
+	UART0->C1 = 0x00;
 
 	/* Clear all prev. configs on C2 */
 	UART0_C2 = 0x00;
@@ -106,8 +123,6 @@ int main(void)
 	UART0_BDH = BAUD_BDH;
 	UART0_BDL = BAUD_BDL;
 
-	/* Disable Tx/Rx */
-	UART0->C1 = 0x00;
 
 	/* Enable RIE and RE */
 	UART0->C2 = 0x24;
@@ -120,10 +135,10 @@ int main(void)
 
 	__enable_irq();
 
-	while(1) {
-		//Wait while the data is read and RDRF is set.
-		while (!(UART0_S1_REG(UART0_BASE_PTR) & UART0_S1_RDRF_MASK));
-	}
+	while(!(UART0_S1 & 0x20)) {
+			/*Wait for Buffer Full!*/
+		}
+
 
 #endif
 

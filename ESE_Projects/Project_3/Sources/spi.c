@@ -5,6 +5,8 @@
  *      Author: vidur
  */
 
+#include "spi.h"
+
 void spi_init()
 {
 	/*1. Enable the clock gate for SPI0 */
@@ -27,10 +29,16 @@ void spi_init()
 	/* Set PDDR to IDLE high */
 	GPIOC_PSOR = 0x00000010;
 
+	/* Enable the SPI in Master Mode */
+	SPI0_C1 |= 0x10;
 
-
-
-
+	/*Set the Baud Rate:
+	 * Divisor = (SPPR+1) * (2^(SPR+1))
+	 * Baud = BusClk/Divisor
+	 * With 0x20, Divisor = 2*2 = 4
+	 * Baud = BusClk/4 (<10MHz)
+	 */
+	SPI0_BR |= 0x10;
 
 
 }

@@ -14,10 +14,10 @@
 void MY_LOG(char *data)
 {
 	/* Initialize the UART */
-	//init_uart();
+	init_uart();
 
 	/*Initialize the Transmit parameters */
-	//config_transmit();
+	config_transmit();
 
 	/* get the length of the passes string */
 	int32_t length = strlen(data);
@@ -35,6 +35,29 @@ void MY_LOG(char *data)
 	}
 
 }
+
+void MY_LOG_LEN(char *data, uint32_t length)
+{
+	/* Initialize the UART */
+	init_uart();
+
+	/*Initialize the Transmit parameters */
+	config_transmit();
+
+	while(1) {
+		uint8_t i = 0;
+		do {
+		char ch = *(data+i);
+		wait_for_buffer_empty();
+		UART0_D = ch;
+		i++;
+		delay(10);
+		} while(i != length);
+		return;
+	}
+
+}
+
 
 void MY_LOG_FLOAT_PARAMS(char*data, float param, int8_t precision)
 {
