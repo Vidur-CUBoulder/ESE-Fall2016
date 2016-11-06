@@ -14,5 +14,7 @@
 #include "log.h"
 #include "timer.h"
 #include "parse_data.h"
+#include "spi.h"
+#include "MKL25Z4.h"
 
 #endif /* INCLUDES_MAIN_H_ */

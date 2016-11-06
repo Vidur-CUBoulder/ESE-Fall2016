@@ -32,6 +32,7 @@
 
 #define SPI_TEST
 
+
 #if 0
 void UART0_IRQHandler() {
 	char c;
@@ -44,7 +45,32 @@ int main(void)
 {
 #ifdef SPI_TEST
 
-	spi_init();
+	spi_1_master_init();
+	//spi_0_slave_init();
+
+	//while(1);
+
+	char *data1 = NULL;
+	data1 = malloc(sizeof(char) * 3);
+	*data1 = 0x0A;
+
+	/* Clear the 4th pin on GPIO; CS = 0*/
+
+#if 1
+	GPIOD_PCOR = 0x00000010; // CLEAR the CS
+
+	while(!(SPI1->S & 0x20)) { }
+	SPI1->D = *data1;
+
+	while(!(SPI1->S & 0x80)) { }
+	*(data1 + sizeof(char)) = SPI1->D;
+	//dummy = SPI1->D;
+
+	GPIOD_PSOR |= 0x00000010; // SET the CS.
+
+	free(data1);
+
+#endif
 
 #endif
 

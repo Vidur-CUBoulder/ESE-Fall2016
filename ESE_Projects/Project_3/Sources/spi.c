@@ -7,38 +7,51 @@
 
 #include "spi.h"
 
-void spi_init()
+void spi_1_master_init() //master
 {
-	/*1. Enable the clock gate for SPI0 */
+	/* Enable the clock gate for SPI1 */
+	SIM_SCGC4 |= 0x00800000;
+
+	/* Enable the clock gate for port D */
+	SIM_SCGC5 |= 0x00001000;
+
+	//PORTD_PCR4 = 0x00000200;
+	PORTD_PCR4 |= 0x100; // Set as GPIO
+	GPIOD_PDDR |= 0x00000010; //Set the GPIO pin as output
+	GPIOD_PSOR |= 0x00000010; // Sets the GPIO pin to high
+	PORTD_PCR5 = 0x00000200;
+	PORTD_PCR6 = 0x00000200;
+	PORTD_PCR7 = 0x00000200;
+
+	SPI1->C2 = 0x00;
+
+	SPI1->C1 = 0x14;
+
+	//SPI1_BR = (SPI_BR_SPPR(0x02) | SPI_BR_SPR(0x08));
+	SPI1_BR = 0x00000000;
+
+	SPI1->C1 |= SPI_C1_SPE_MASK; //Enable the SPE!
+
+}
+
+void spi_0_slave_init() //slave
+{
+	/* Enable the clock gate for SPI0 */
 	SIM_SCGC4 |= 0x00400000;
 
-	/*Next, enable the clock gate for port C */
+	/* Enable the clock gate for PORTC */
 	SIM_SCGC5 |= 0x00000800;
 
-	/* Config the ALT values on all the PORTC pins (4, 5, 6, 7) */
-	// Master-> KL25z Slave->nRF
-	//PORTC_PCR4 |= 0x00000200; //SPI0_PCS0 --> may not need to config as PCS ??
-	PORTC_PCR5 |= 0x00000200; //SPI0_SCK
-	PORTC_PCR6 |= 0x00000200; //SPI0_MOSI --> Master In Slave Out
-	PORTC_PCR7 |= 0x00000200; //SPI0_MISO --> Master Out Slave In
+	/* Enable the ALT mux for the GPIO pins */
+	PORTC_PCR4 = 0x00000200;
+	PORTC_PCR5 = 0x00000200;
+	PORTC_PCR6 = 0x00000200;
+	PORTC_PCR7 = 0x00000200;
 
-	PORTC_PCR4 |= 0x00000100; //Config. as GPIO.
+	SPI0->C1 |= 0x02;
 
-	/* Config. PCR4 as GPIO output */
-	GPIOC_PDDR = 0x00000010;
-	/* Set PDDR to IDLE high */
-	GPIOC_PSOR = 0x00000010;
+	SPI0->C2 = SPI_C2_MODFEN_MASK;
 
-	/* Enable the SPI in Master Mode */
-	SPI0_C1 |= 0x10;
-
-	/*Set the Baud Rate:
-	 * Divisor = (SPPR+1) * (2^(SPR+1))
-	 * Baud = BusClk/Divisor
-	 * With 0x20, Divisor = 2*2 = 4
-	 * Baud = BusClk/4 (<10MHz)
-	 */
-	SPI0_BR |= 0x10;
-
+	SPI0->C1 |= SPI_C1_SPE_MASK;
 
 }
