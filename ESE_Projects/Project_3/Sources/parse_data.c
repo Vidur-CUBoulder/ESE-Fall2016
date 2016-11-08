@@ -7,6 +7,55 @@
 
 #include "parse_data.h"
 
+errors get_message(char *data)
+{
+	if (data == NULL) {
+		return NULL_FAILURE;
+	}
+
+	init_uart();
+	config_receive();
+	uint16_t count = 0;
+
+	while(1) {
+		while(!(UART0->S1 & 0x20)) {
+			/* Wait for Buffer Full */
+		}
+
+		*(data+count) = UART0->D;
+
+		if( *(data+count) == 0x23) { /* stop bit: # */
+			/* Signifies end of the CLI command */
+			return SUCCESSFUL;
+		}
+		count++;
+	}
+	return INVALID;
+}
+
+errors parse_CLI(char *str_data, CLI *command_in)
+{
+	if(str_data == NULL) {
+		return NULL_FAILURE;
+	}
+
+	uint8_t i = 0;
+
+	command_in->command = *(str_data+1);
+	command_in->cmd_length = *(str_data+2);
+	while(i != (command_in->cmd_length-2-3)) {
+		command_in->data[i] = *(str_data+3+i);
+		i++;
+	}
+	command_in->checksum[0] = *(str_data+command_in->cmd_length-2);
+	command_in->checksum[1] = *(str_data+command_in->cmd_length-1);
+
+	return SUCCESSFUL;
+
+}
+
+#ifdef CLI_PARSER
+
 errors get_CLI(char *str_data, uint32_t *len)
 {
 	if (str_data == NULL) {
@@ -156,4 +205,6 @@ errors act_on_command(CLI *cmd_in)
 
 	return SUCCESSFUL;
 }
+
+#endif
 

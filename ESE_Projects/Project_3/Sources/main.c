@@ -30,51 +30,61 @@
 
 #include "main.h"
 
-#define SPI_TEST
-
-
-#if 0
-void UART0_IRQHandler() {
-	char c;
-	c = UART0->D;
-}
-#endif
-
+#define SPI_Trials
+#define SPI_Read_Working
 
 int main(void)
 {
-#ifdef SPI_TEST
 
-	spi_1_master_init();
-	//spi_0_slave_init();
+#ifdef SPI_0_WORKING
+
+	spi_0_init();
 
 	//while(1);
 
-	char *data1 = NULL;
-	data1 = malloc(sizeof(char) * 3);
-	*data1 = 0x0A;
+	volatile char data1 = 0x20; //Write to the config register.
+	volatile char data2 = 0x02; //Power up the device!
+	volatile uint8_t rx_ret = 0;
+	//data1 = malloc(sizeof(char) * 3);
+	//*data1 = 0x0A;
 
+	GPIOC_PCOR = 0x00000010;               // Activate SPI
+	    while(WAIT_FOR_SPTEF);
+	    //while(!(SPI1->S & 0x20)) { }
+	      //SPI_D_REG(SPI0) = 0xFF;
+	    SPI0->D = 0xFF;
+	    //while(!(SPI1->S & 0x80)) { }
+	       //rx_ret = SPI_D_REG(SPI0);
+	    while(WAIT_FOR_SPRF);
+	    rx_ret = SPI0->D;
+
+
+	GPIOC_PSOR = 0x00000010;
 	/* Clear the 4th pin on GPIO; CS = 0*/
 
-#if 1
-	GPIOD_PCOR = 0x00000010; // CLEAR the CS
+#endif
 
-	while(!(SPI1->S & 0x20)) { }
-	SPI1->D = *data1;
+#ifdef SPI_Read_Working
 
-	while(!(SPI1->S & 0x80)) { }
-	*(data1 + sizeof(char)) = SPI1->D;
-	//dummy = SPI1->D;
+	uint8_t rx_ret[7] = {0};
+	uint8_t cmd = RF_CH;
 
-	GPIOD_PSOR |= 0x00000010; // SET the CS.
+	/*Write Operations*/
+	uint8_t reg_addr = /*0x25*/W_REGISTER | RF_CH;
+	uint8_t write_value = 0x02;
 
-	free(data1);
+	spi_init();
+
+	rx_ret[0] = Read_from_nRF_Register(&cmd);
+
+	rx_ret[1] = Write_to_nRF_Register(&reg_addr, write_value);
+
+	rx_ret[2] = Read_from_nRF_Register(&cmd);
 
 #endif
 
-#endif
 
-#ifdef MSG_STRUCT
+#ifdef CLI_PARSER
 
 	CLI command_in;
 	uint32_t command_length = 0;
@@ -86,6 +96,22 @@ int main(void)
 	parse_CLI(data, &command_in);
 
 	act_on_command(&command_in);
+
+#endif
+
+#ifdef MSG_STRUCT_2
+
+	CLI command_in;
+	uint8_t i = 0;
+	char payload[40];
+	//char *payload = NULL;
+	//payload = malloc(sizeof(char) * 30);
+
+	get_message(&payload[0]);
+
+	parse_CLI(&payload[0], &command_in);
+
+	//free(payload);
 
 #endif
 
@@ -122,49 +148,6 @@ int main(void)
 		handle_errors(dma_ret_handle);
 	#endif
 #endif
-
-#endif
-
-#ifdef test
-
-	__disable_irq();
-
-	/* UART0 Clock gate */
-	SIM->SCGC4 |= 0x0400;
-
-	/* Process clock for PORT A*/
-	SIM->SCGC5 |= 0x0200;
-
-	/* Set UART0SRC */
-	SIM->SOPT2 |= 0x04000000;
-
-	/* Disable Tx/Rx */
-	UART0->C1 = 0x00;
-
-	/* Clear all prev. configs on C2 */
-	UART0_C2 = 0x00;
-
-	/* Config the baud settings */
-	UART0_C4 = 0x0F;
-	UART0_BDH = BAUD_BDH;
-	UART0_BDL = BAUD_BDL;
-
-
-	/* Enable RIE and RE */
-	UART0->C2 = 0x24;
-	//NVIC->ISER[0] |= 0x00001000;
-
-	/* Set the Muxing and the IRQ on PORT A*/
-	PORTA_PCR1 = 0x0200;
-
-	NVIC_EnableIRQ(12);
-
-	__enable_irq();
-
-	while(!(UART0_S1 & 0x20)) {
-			/*Wait for Buffer Full!*/
-		}
-
 
 #endif
 

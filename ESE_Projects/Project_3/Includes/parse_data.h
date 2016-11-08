@@ -21,7 +21,8 @@ typedef enum errors_t {
 	SUCCESSFUL,
 	INCORRECT_ENTRY,
 	NULL_FAILURE,
-	INVALID
+	INVALID,
+	INVALID_RET_FROM_nRF
 } errors;
 
 typedef enum cmds_t {
@@ -46,19 +47,30 @@ typedef enum ledcolors_t {
 
 typedef struct classify_CLI {
 
+#ifdef CLI_PARSER
 	action act;
+#endif
 	cmds command;
-	uint32_t cmd_length;
+	uint8_t cmd_length;
+#ifdef CLI_PARSER
 	char color[8];
+
 	union {
 		uint32_t baudrate;
 		uint8_t led_intensity;
 		uint8_t kill_program;
 	} u_cmd_value;
-	uint16_t checksum;
+#endif
+	uint8_t data[40];
+	uint8_t checksum[2];
 } CLI;
 
 /* Function Prototypes */
+
+errors get_message(char *data);
+
+errors parse_CLI(char *str_data, CLI *command_in);
+
 
 errors set_union_values(CLI *cmd_in, char *word);
 
@@ -68,7 +80,7 @@ static char *set_CLI_commands(cmds command);
 
 static char *set_CLI_led_colors(ledcolors colors);
 
-errors parse_CLI(char *cli_data, CLI *cmd_in);
+errors parse_CLI_words(char *cli_data, CLI *cmd_in);
 
 uint32_t get_word(char *cli_data, char *ret_word, CLI cmd_in, uint32_t pos);
 
