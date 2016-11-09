@@ -72,21 +72,21 @@ void turn_on_leds(ledcolors color)
 						GPIOD_PCOR = 0x00000002;
 						break;
 
-				case 4:
+				case yellow:
 						turn_off_all_leds();
 						/*Turn on the Red and Green Led*/
 						GPIOB_PCOR = 0x00040000;
 						GPIOB_PCOR = 0x00080000;
 						break;
 
-				case 5:
+				case magenta:
 						turn_off_all_leds();
 						/*Turn on the Red and Blue Led*/
 						GPIOB_PCOR = 0x00040000;
 						GPIOD_PCOR = 0x00000002;
 						break;
 
-				case 6:
+				case cyan:
 						turn_off_all_leds();
 						/*Turn on the Green and Blue Led*/
 						GPIOB_PCOR = 0x00080000;

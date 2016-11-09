@@ -30,8 +30,9 @@
 
 #include "main.h"
 
-#define SPI_Trials
-#define SPI_Read_Working
+//#define PWM_ADJUST
+//#define RED_LED
+#define MSG_STRUCT_2
 
 int main(void)
 {
@@ -64,7 +65,7 @@ int main(void)
 
 #endif
 
-#ifdef SPI_Read_Working
+#ifdef SPI_Read_Write_Working
 
 	uint8_t rx_ret[7] = {0};
 	uint8_t cmd = RF_CH;
@@ -83,6 +84,25 @@ int main(void)
 
 #endif
 
+#ifdef MSG_STRUCT_2
+
+	CLI command_in;
+	uint8_t i = 0;
+	checksum ret_checksum_result;
+	uint8_t *payload = NULL;
+	payload = malloc(sizeof(char) * 30);
+
+	get_message(payload);
+
+	parse_CLI(payload, &command_in);
+
+	ret_checksum_result = fletchers_checksum(command_in);
+
+	act_on_command(&command_in);
+
+	free(payload);
+
+#endif
 
 #ifdef CLI_PARSER
 
@@ -99,29 +119,11 @@ int main(void)
 
 #endif
 
-#ifdef MSG_STRUCT_2
-
-	CLI command_in;
-	uint8_t i = 0;
-	char payload[40];
-	//char *payload = NULL;
-	//payload = malloc(sizeof(char) * 30);
-
-	get_message(&payload[0]);
-
-	parse_CLI(&payload[0], &command_in);
-
-	//free(payload);
-
-#endif
-
-
 #ifdef dma_test
 
 	uint8_t src[] = {0x39,0x53,0x57,0x32,0x74,0x23,0xa5,0xc4, 0x13, 0xfd, 0xcd};
 	uint8_t dst[] = {8,1,9,0,4,1,23,5, 1,6, 7};
-	//uint8_t src[100] = {12};
-	//uint8_t dst[100] = {10};
+
 	uint32_t len = 11;
 
 #ifdef DEBUG

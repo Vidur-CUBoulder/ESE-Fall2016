@@ -32,18 +32,6 @@ void spi_init(void)
 
 }
 
-#if 0
-void Pull_CS_Low(void)
-{
-	GPIOC_PCOR = 0x00000010;
-}
-
-void Pull_CS_High(void)
-{
-	GPIOC_PSOR = 0x00000010;
-}
-#endif
-
 uint8_t Send_Read_Write_Command(uint8_t *cmd)
 {
 	uint8_t ret_value = 0;
