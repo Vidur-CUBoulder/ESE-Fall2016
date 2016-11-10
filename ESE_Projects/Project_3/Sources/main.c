@@ -30,61 +30,71 @@
 
 #include "main.h"
 
-//#define PWM_ADJUST
-//#define RED_LED
-#define MSG_STRUCT_2
+
+#define SPI_Read_Write_Working
+#define DEBUG
+
 
 int main(void)
 {
 
-#ifdef SPI_0_WORKING
-
-	spi_0_init();
-
-	//while(1);
-
-	volatile char data1 = 0x20; //Write to the config register.
-	volatile char data2 = 0x02; //Power up the device!
-	volatile uint8_t rx_ret = 0;
-	//data1 = malloc(sizeof(char) * 3);
-	//*data1 = 0x0A;
-
-	GPIOC_PCOR = 0x00000010;               // Activate SPI
-	    while(WAIT_FOR_SPTEF);
-	    //while(!(SPI1->S & 0x20)) { }
-	      //SPI_D_REG(SPI0) = 0xFF;
-	    SPI0->D = 0xFF;
-	    //while(!(SPI1->S & 0x80)) { }
-	       //rx_ret = SPI_D_REG(SPI0);
-	    while(WAIT_FOR_SPRF);
-	    rx_ret = SPI0->D;
-
-
-	GPIOC_PSOR = 0x00000010;
-	/* Clear the 4th pin on GPIO; CS = 0*/
-
-#endif
-
 #ifdef SPI_Read_Write_Working
 
 	uint8_t rx_ret[7] = {0};
-	uint8_t cmd = RF_CH;
+	uint8_t ret_debug_handle = 0;
+	uint8_t out[5] = {0};
+	uint8_t return_val[5] = {0};
+	uint8_t cntr = 0;
 
-	/*Write Operations*/
-	uint8_t reg_addr = /*0x25*/W_REGISTER | RF_CH;
-	uint8_t write_value = 0x02;
-
+	/* Init. SPI */
 	spi_init();
 
-	rx_ret[0] = Read_from_nRF_Register(&cmd);
+	/*Config. the register address*/
+	uint8_t reg_addr = R_REGISTER | TX_ADDR;
 
-	rx_ret[1] = Write_to_nRF_Register(&reg_addr, write_value);
+	/*Config the value to be written to that register*/
+	uint8_t write_value = 0x11;
 
-	rx_ret[2] = Read_from_nRF_Register(&cmd);
+	ret_debug_handle = Read_5_Bytes(&reg_addr, &return_val[0]);
+	for(cntr=0; cntr<5; cntr++){
+		out[cntr] = return_val[cntr];
+	}
+	MY_LOG_PARAMS("Read Operation Output: ", out[0]);
+	MY_LOG("\n");
+
+	/*Change config to write*/
+	reg_addr = W_REGISTER | TX_ADDR;
+
+	ret_debug_handle = Write_to_nRF_Register(&reg_addr, write_value);
+	for(cntr=0; cntr<5; cntr++){
+			out[cntr] = return_val[cntr];
+	}
+	MY_LOG_PARAMS("Write Operation Output: ", out[0]);
+	MY_LOG("\n");
+
+	/* Read agian from the register */
+	reg_addr = R_REGISTER | TX_ADDR;
+
+	ret_debug_handle = Read_5_Bytes(&reg_addr, &return_val[0]);
+	for(cntr=0; cntr<5; cntr++){
+		out[cntr] = return_val[cntr];
+	}
+	MY_LOG_PARAMS("Read Operation Output: ", out[0]);
+	MY_LOG("\n");
+
+#if READ_PRINT_SINGLE_BYTE
+	/*Change config to write*/
+	reg_addr = R_REGISTER | CONFIG;
+
+	ret_debug_handle = Read_Single_Byte(&reg_addr, &return_val);
+	out = return_val;
+	MY_LOG_PARAMS("Read Operation Output(post write): ", out);
+	MY_LOG("\n");
+#endif
 
 #endif
 
-#ifdef MSG_STRUCT_2
+#ifdef UART_PARSER
 
 	CLI command_in;
 	uint8_t i = 0;
@@ -98,7 +108,12 @@ int main(void)
 
 	ret_checksum_result = fletchers_checksum(command_in);
 
-	act_on_command(&command_in);
+	if(!ret_checksum_result) {
+		MY_LOG("Checksum Passes!\n");
+		act_on_command(&command_in);
+	} else {
+		MY_LOG("Checksum Failure!\n");
+	}
 
 	free(payload);
 
@@ -119,33 +134,57 @@ int main(void)
 
 #endif
 
-#ifdef dma_test
+#ifdef ENABLE_DMA
+;
+	uint8_t src[11] = {0};
+	uint8_t dst[11] = {0};
 
-	uint8_t src[] = {0x39,0x53,0x57,0x32,0x74,0x23,0xa5,0xc4, 0x13, 0xfd, 0xcd};
-	uint8_t dst[] = {8,1,9,0,4,1,23,5, 1,6, 7};
+	uint8_t i = 0;
+	for (i = 0; i<11; i++) {
+		src[i] = 0x05;
+		dst[i] = 0x03;
+	}
 
 	uint32_t len = 11;
 
 #ifdef DEBUG
 	/*Optional UART config. To get debugging info.*/
-	init_uart(); //Initialize the UART...
-	config_transmit(); //Config. the transmit registers.
+	init_uart();
+	config_transmit();
 	MY_LOG("UART Enabled Successfully!\n");
 #endif
 
 #ifdef DMA_MEMMOVE
-	dma_debug dma_ret_handle;
+	debug dma_ret_handle;
 
 	/*Initialize the counter*/
+	//start_counter();
 	dma_ret_handle = my_memmove_dma( src, dst, len);
+	//stop_counter();
 	#ifdef DEBUG
 		handle_errors(dma_ret_handle);
 	#endif
 #endif
 
 #ifdef DMA_MEMZERO
-	dma_debug dma_ret_handle;
+
+#if 0
+	double sys_clock = 0.047; // in microsecs
+	double count, net_time;
+
+	counter_init();
+#endif
+
+	debug dma_ret_handle;
+
+	//start_counter();
 	dma_ret_handle = my_memzero_dma(src, len);
+	//stop_counter();
+#if 0
+	count = TPM0_CNT;
+	net_time = count * sys_clock;
+#endif
+
 	#ifdef DEBUG
 		handle_errors(dma_ret_handle);
 	#endif

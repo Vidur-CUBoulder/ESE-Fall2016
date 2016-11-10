@@ -7,8 +7,9 @@
 
 #include "dma.h"
 
-dma_debug my_memmove_dma(uint8_t *src, uint8_t *dst, uint32_t length)
+debug my_memmove_dma(uint8_t *src, uint8_t *dst, uint32_t length)
 {
+
 	/*1. Config. the clock gating register for DMAMUX clock gate register.*/
 	SIM_SCGC6 |= ENABLE_CLOCK_GATE_DMAMUX;
 
@@ -29,12 +30,13 @@ dma_debug my_memmove_dma(uint8_t *src, uint8_t *dst, uint32_t length)
 	uint32_t word_remainder = length%4;
 
 	/* First do the transfer of words*/
+
 	if(word_transfers != 0) {
 		/*Config DMA for word transfers*/
 		config_word_length(word_transfers);
 
 		/*Start the word trasnfer*/
-		dma_debug ret_handle;
+		debug ret_handle;
 		ret_handle = start_dma_transfer();
 		if(ret_handle != DMA_SUCCESSFUL) {
 			return ret_handle;
@@ -48,7 +50,8 @@ dma_debug my_memmove_dma(uint8_t *src, uint8_t *dst, uint32_t length)
 		config_one_byte_length(word_remainder);
 
 		/*start the transfer of 1B data*/
-		dma_debug ret_handle;
+
+		debug ret_handle;
 		ret_handle = start_dma_transfer();
 		if(ret_handle != DMA_SUCCESSFUL) {
 			return ret_handle;
@@ -58,7 +61,7 @@ dma_debug my_memmove_dma(uint8_t *src, uint8_t *dst, uint32_t length)
 	return DMA_SUCCESSFUL;
 }
 
-dma_debug start_dma_transfer()
+debug start_dma_transfer()
 {
 	/*Enable the DMA bit in the DMAMUX register */
 	DMAMUX0_CHCFG0 = ENABLE_DMA_DMAMUX;
@@ -70,7 +73,7 @@ dma_debug start_dma_transfer()
 	return (check_dma_errors());
 }
 
-dma_debug check_dma_errors()
+debug check_dma_errors()
 {
 	/* Check the registers for any errors */
 	if ( (DMA_DSR_BCR0 & RAISE_CE_BIT) == RAISE_CE_BIT ) {
@@ -87,7 +90,7 @@ dma_debug check_dma_errors()
 	return DMA_SUCCESSFUL;
 }
 
-dma_debug config_word_length(uint32_t length)
+debug config_word_length(uint32_t length)
 {
 	/*Set the config. for a 32 bit increment.
 	 * SINC = 1; DINC = 1
@@ -103,7 +106,7 @@ dma_debug config_word_length(uint32_t length)
 
 }
 
-dma_debug config_word_length_memset(uint32_t length)
+debug config_word_length_memset(uint32_t length)
 {
 	/*Set the config. for a 32bit increment.
 	 * SINC = 0; DINC = 1
@@ -119,7 +122,7 @@ dma_debug config_word_length_memset(uint32_t length)
 
 }
 
-dma_debug config_one_byte_length(uint32_t length)
+debug config_one_byte_length(uint32_t length)
 {
 	/*3. First disable the DMAMUX_CHCFG0 register. */
 	DMAMUX0_CHCFG0 = DISABLE_DMAMUX_CFG;
@@ -136,19 +139,13 @@ dma_debug config_one_byte_length(uint32_t length)
 	 * multiply the input by either 4(32-bit) or 2(16-bit) to get a correct length.
 	 */
 
-#if 0
-	if (temp_length != length) {
-		return LENGTH_ERROR;
-	}
-#endif
-
 	DMA_DSR_BCR0 |= length; //Need to confirm this!
 	DMA_DSR_BCR0 |= length;
 
 	return SUCCESS;
 }
 
-dma_debug config_one_byte_length_memset(uint32_t length)
+debug config_one_byte_length_memset(uint32_t length)
 {
 	DMAMUX0_CHCFG0 = DISABLE_DMAMUX_CFG;
 
@@ -163,7 +160,7 @@ dma_debug config_one_byte_length_memset(uint32_t length)
 
 	return SUCCESS;
 }
-dma_debug my_memzero_dma(uint8_t *src, uint32_t length)
+debug my_memzero_dma(uint8_t *src, uint32_t length)
 {
 	uint32_t set_zero = 0;
 
@@ -192,7 +189,7 @@ dma_debug my_memzero_dma(uint8_t *src, uint32_t length)
 			config_word_length_memset(word_transfers);
 
 			/*Start the word trasnfer*/
-			dma_debug ret_handle;
+			debug ret_handle;
 			ret_handle = start_dma_transfer();
 			if(ret_handle != DMA_SUCCESSFUL) {
 				return ret_handle;
@@ -206,7 +203,7 @@ dma_debug my_memzero_dma(uint8_t *src, uint32_t length)
 			config_one_byte_length_memset(word_remainder);
 
 			/*start the transfer of 1B data*/
-			dma_debug ret_handle;
+			debug ret_handle;
 			ret_handle = start_dma_transfer();
 			if(ret_handle != DMA_SUCCESSFUL) {
 				return ret_handle;

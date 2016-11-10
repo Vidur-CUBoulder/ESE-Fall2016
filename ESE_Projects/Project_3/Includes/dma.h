@@ -13,15 +13,8 @@
 #include<stdint.h>
 #include<stdlib.h>
 #include "MKL25Z4.h"
-
-typedef enum debug_e {
-	SUCCESS, //Generic Success enum.
-	DMA_SUCCESSFUL,
-	CE_BIT_SET,
-	BES_BIT_SET,
-	BED_BIT_SET,
-	LENGTH_ERROR //More than what is possible was entered!
-}dma_debug;
+#include "timer.h"
+#include "error_handling.h"
 
 #define ENABLE_CLOCK_GATE_DMAMUX 0x00000002
 #define ENABLE_CLOCK_GATE_DMA 0x00000100
@@ -38,16 +31,16 @@ typedef enum debug_e {
 #define DCR_32_BIT_INCREMENTS_MEMZERO 0x00080000
 #define DCR_8BIT_INCREMENTS_MEMZERO 0x001a0000
 
-dma_debug my_memmove_dma(uint8_t *src, uint8_t *dst, uint32_t length);
+uint8_t my_memmove_dma(uint8_t *src, uint8_t *dst, uint32_t length);
 
-dma_debug my_memzero_dma(uint8_t *src, uint32_t length);
+uint8_t my_memzero_dma(uint8_t *src, uint32_t length);
 
-dma_debug config_one_byte_length(uint32_t length);
+uint8_t config_one_byte_length(uint32_t length);
 
-dma_debug check_dma_errors();
+uint8_t check_dma_errors();
 
-dma_debug config_word_length();
+uint8_t config_word_length();
 
-dma_debug start_dma_transfer();
+uint8_t start_dma_transfer();
 
 #endif /* INCLUDES_DMA_H_ */

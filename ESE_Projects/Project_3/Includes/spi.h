@@ -11,6 +11,7 @@
 #include "MKL25Z4.h"
 #include "parse_data.h"
 #include "spi_masks.h"
+#include "nRF.h"
 
 /*Function: spi_init()
  * Parameters: void
@@ -19,24 +20,6 @@
  */
 void spi_init(void);
 
-/* Function: Send_Read_Write_Command(uint8_t *cmd)
- * Parameters: Command byte that has to be sent to the nRF module.
- * This could be either for reading or writing.
- * Return: Value returned by the nRF module
- * Description: Send the command byte to the nRF module and return
- * the value that MISO pushes back into the Rx Buffer.
- */
-uint8_t Send_Read_Write_Command(uint8_t *cmd);
-
-/*Function: Send_Dummy_Byte(void)
- * Parameters: void
- * Return: Value returned by the nRF module
- * Description: Send the NOP byte to the nRF module to:
- * 	a. Get/read the value of the previous command
- * 	b. Get/read the value of the Status register.
- */
-uint8_t Send_Dummy_Byte(void);
-
 /*Function: Read_from_nRF_Register(uint8_t *reg_addr)
  * Parameters: register address that you want to read from.
  * Return: Value that is returned via MISO to the Master Device.
@@ -44,15 +27,6 @@ uint8_t Send_Dummy_Byte(void);
  * a register in the nRF device.
  */
 uint8_t Read_from_nRF_Register(uint8_t *reg_addr);
-
-/*Function: Send_Write_Value(uint8_t write_value)
- * Parameters: value that has to be written to the nRF register.
- * Return: Value that is returned via MISO to the Master Device.
- * Description: Send the write value to the respective nRF register.
- * XXX: Please note that this function must be preceded by Send_Read_Write_Command(*cmd)!
- * Failure to do this will result in an unexpected behavior.
- */
-uint8_t Send_Write_Value(uint8_t write_value);
 
 /*Function: Write_to_nRF_Register(uint8_t *reg_addr, uint8_t write_value)
  * Paramters: reg_addr:  This is the addr. of the register that you want to write to
@@ -64,5 +38,28 @@ uint8_t Send_Write_Value(uint8_t write_value);
  * should be used to write to a particular register in the nRF module.
  */
 uint8_t Write_to_nRF_Register(uint8_t *reg_addr, uint8_t write_value);
+
+/*Function: uint8_t Read_Single_Byte(uint8_t *cmd, uint8_t *ret_value);
+ * Parameters:
+ * 		a. cmd: pass the struct where all the data is organized.
+ * 		b. ret_value: the final return value from the function after it has done
+ * 			all the processing.
+ * Return: an enum that may be used for debugging purposes.
+ * Description: this function can be used to read from registers on the nRF
+ * 			that are only one byte in length.
+ */
+uint8_t Read_Single_Byte(uint8_t *cmd, uint8_t *ret_value);
+
+/*Function: uint8_t Read_5_Bytes(uint8_t *cmd, uint8_t *ret_value);
+ * Parameters:
+ * 		a. cmd: pass the struct where all the data is organized.
+ * 		b. ret_value: the final return value from the function after it has done
+ * 				all the processing.
+ * Return: an enum that may be used for debugging purposes.
+ * Description: this function can be used to read from registers on the nRF
+ * 			that are 5 bytes long. It pushed 5 NOP bytes to the module.
+ */
+uint8_t Read_5_Bytes(uint8_t *cmd, uint8_t *ret_value);
+
 
 #endif /* INCLUDES_SPI_H_ */

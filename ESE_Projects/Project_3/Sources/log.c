@@ -140,7 +140,7 @@ void MY_LOG_PARAMS(char *data, uint32_t param)
 			wait_for_buffer_empty();
 			UART0->D = ch;
 			i++;
-			delay(70);
+			delay(20);
 		} while(i != length);
 
 		i = 0;
@@ -149,7 +149,7 @@ void MY_LOG_PARAMS(char *data, uint32_t param)
 			wait_for_buffer_empty();
 			UART0->D = ch;
 			i++;
-			delay(70);
+			delay(20);
 		} while(i != cnt);
 
 		free(store_param);

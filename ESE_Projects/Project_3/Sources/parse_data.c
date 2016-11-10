@@ -58,7 +58,6 @@ checksum  fletchers_checksum(CLI cmd)
 
 }
 
-
 errors parse_CLI(char *str_data, CLI *command_in)
 {
 	if(str_data == NULL) {
@@ -139,6 +138,7 @@ errors act_on_command(CLI *command_in)
 		case intensity: /* Set the intensity of the LED! */
 						MY_LOG("Setting the LED Intensity\n");
 						MY_LOG("Press 'W' to increase and 'S' to decrease\n");
+						MY_LOG("Press 'Q' to quit.\n");
 						modify_intensity(command_in->data[1]);
 						break;
 

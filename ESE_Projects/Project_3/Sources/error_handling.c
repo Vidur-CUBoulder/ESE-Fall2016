@@ -7,7 +7,7 @@
 
 #include "error_handling.h"
 
-void handle_errors(dma_debug error_handle)
+void handle_errors(debug error_handle)
 {
 	switch(error_handle) {
 

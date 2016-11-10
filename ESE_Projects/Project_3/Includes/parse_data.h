@@ -16,6 +16,7 @@
 #include "log.h"
 #include "data.h"
 #include "led.h"
+#include "error_handling.h"
 
 #define UART_STOP_BYTE 0x23
 
@@ -24,7 +25,9 @@ typedef enum errors_t {
 	INCORRECT_ENTRY,
 	NULL_FAILURE,
 	INVALID,
-	INVALID_RET_FROM_nRF
+	INVALID_RET_FROM_nRF,
+	nRF_READ_SUCCESSFUL,
+	nRF_READ_FAILURE
 } errors;
 
 typedef enum cmds_t {

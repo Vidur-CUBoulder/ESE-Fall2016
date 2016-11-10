@@ -1,0 +1,3 @@
+Part1 : DMA Operation and Profiling 
+The DMA feature allows the RAM to gain access to the memory without CPU intervention. This is a significantly faster method of accessing memory and is especially notable for large trasnfer chunks. The DMA operation was successfully created on the Freescale Freedom board and subsequently profiled. 
+

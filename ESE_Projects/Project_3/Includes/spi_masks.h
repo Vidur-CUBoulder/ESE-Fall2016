@@ -65,7 +65,6 @@
 #define SETUP_RETR 0x04
 #define RF_CH 0x05
 #define RF_SETUP 0x06
-#define STATUS 0x07
 #define OBSERVE_TX 0x08
 #define RPD 0x09
 #define RX_ADDR_P0 0x0A
@@ -85,7 +84,8 @@
 #define DYNPD 0x1C
 #define FEATURE 0x1D
 
+/* Misc. Macros */
 
-
+#define MAX_REG_LENGTH 5
 
 #endif /* INCLUDES_SPI_MASKS_H_ */
