@@ -31,12 +31,53 @@
 #include "main.h"
 
 
-#define SPI_Read_Write_Working
-#define DEBUG
+//#define SPI_Read_Write_Working
+//#define DEBUG
 
 
 int main(void)
 {
+
+	spi_init(); //Init. the SPI.
+
+	/*Config PORTD pin19 as GPIO for CE on nRF*/
+	SIM_SCGC5 |= 0x00001000;
+
+	PORTD_PCR7 |= 0x00000100;
+
+	GPIOD_PDDR |= 0x00000080;
+
+	GPIOD_PCOR |= 0x00000080;
+
+	/*First fill RX_ADDR_P0 with 0xE7E7E7E7E7 same as TX.
+	 * This is set to that register by default. So not doing anything.*/
+
+	/*Enable AA for Pipe0*/
+	Write_to_nRF_Register(EN_AA, 0x01);
+
+	/*Enable Pipe0*/
+	Write_to_nRF_Register(EN_RXADDR, 0x01);
+
+	/*Select RF Channel as 76*/
+	Write_to_nRF_Register(RF_CH, 0x4C);
+
+	/*Select the same RX payload width as the TX payload width*/
+	Write_to_nRF_Register(RX_PW_P0, 0x01);
+
+	/*config RF_SETUP*/
+	Write_to_nRF_Register(RF_SETUP, 0x60);
+
+	/*set the CONFIG register*/
+	Write_to_nRF_Register(0x07, 0x0F);
+
+	GPIOD_PSOR |= 0x00000080; // Pull the CE pin high.
+
+	while(1) {
+		if (Read_from_nRF_Register(R_RX_PAYLOAD) == 0x01) { //FIXME: check, may not be correct
+			return 0;
+		}
+	}
+
 
 #ifdef SPI_Read_Write_Working
 
