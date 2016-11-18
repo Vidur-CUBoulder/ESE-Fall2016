@@ -7,7 +7,12 @@
 
 #include "spi.h"
 
-void spi_init(void)
+void spi_1_init(void)
+{
+	/* Enable the clock gate for SPI1 */
+	SIM_SCGC4 |= 
+
+void spi_0_init(void)
 {
 	/* Enable the clock gate for SPI0 */
 	SIM_SCGC4 |= SET_SPI_CLK_GATE;

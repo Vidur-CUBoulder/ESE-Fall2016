@@ -1,0 +1,72 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+BLUE_LED	parse_data.c	/^#define BLUE_LED$/;"	d	file:
+DEBUG	parse_data.c	/^#define DEBUG$/;"	d	file:
+MY_LOG	log.c	/^void MY_LOG(char *data)$/;"	f
+MY_LOG_FLOAT_PARAMS	log.c	/^void MY_LOG_FLOAT_PARAMS(char*data, float param, int8_t precision)$/;"	f
+MY_LOG_LEN	log.c	/^void MY_LOG_LEN(char *data, uint32_t length)$/;"	f
+MY_LOG_PARAMS	log.c	/^void MY_LOG_PARAMS(char *data, uint32_t param)$/;"	f
+Read_5_Bytes	spi.c	/^uint8_t Read_5_Bytes(uint8_t *cmd, uint8_t *ret_value)$/;"	f
+Read_5_Bytes_SPI1	spi.c	/^uint8_t Read_5_Bytes_SPI1(uint8_t *cmd, uint8_t *ret_value)$/;"	f
+Read_Single_Byte	spi.c	/^uint8_t Read_Single_Byte(uint8_t *cmd, uint8_t *ret_value)$/;"	f
+Read_from_nRF_Register	spi.c	/^uint8_t Read_from_nRF_Register(uint8_t *reg_addr)$/;"	f
+Read_from_nRF_Register_SPI1	spi.c	/^uint8_t Read_from_nRF_Register_SPI1(uint8_t *reg_addr)$/;"	f
+Send_Dummy_Byte	nRF.c	/^uint8_t Send_Dummy_Byte(void)$/;"	f
+Send_Read_Write_Command	nRF.c	/^uint8_t Send_Read_Write_Command(uint8_t *cmd)$/;"	f
+Send_Write_Value	nRF.c	/^uint8_t Send_Write_Value(uint8_t write_value)$/;"	f
+Write_to_nRF_Register	spi.c	/^uint8_t Write_to_nRF_Register(uint8_t *reg_addr, uint8_t write_value)$/;"	f
+act_on_CLI_command	parse_data.c	/^errors act_on_CLI_command(CLI *cmd_in)$/;"	f
+act_on_command	parse_data.c	/^errors act_on_command(CLI *command_in)$/;"	f
+big_to_little	data.c	/^int32_t big_to_little(int32_t data)$/;"	f
+check_dma_errors	dma.c	/^debug check_dma_errors()$/;"	f
+config_leds	led.c	/^void config_leds()$/;"	f
+config_one_byte_length	dma.c	/^debug config_one_byte_length(uint32_t length)$/;"	f
+config_one_byte_length_memset	dma.c	/^debug config_one_byte_length_memset(uint32_t length)$/;"	f
+config_receive	uart.c	/^void config_receive()$/;"	f
+config_transmit	uart.c	/^void config_transmit()$/;"	f
+config_word_length	dma.c	/^debug config_word_length(uint32_t length)$/;"	f
+config_word_length_memset	dma.c	/^debug config_word_length_memset(uint32_t length)$/;"	f
+counter_init	timer.c	/^void counter_init()$/;"	f
+delay	uart.c	/^void delay(uint8_t value)$/;"	f
+disable_Tx_Rx	uart.c	/^void disable_Tx_Rx()$/;"	f
+dump_memory	data.c	/^void dump_memory(uint8_t *start, uint32_t length)$/;"	f
+fletchers_checksum	parse_data.c	/^checksum  fletchers_checksum(CLI cmd)$/;"	f
+get_CLI	parse_data.c	/^errors get_CLI(char *str_data, uint32_t *len)$/;"	f
+get_message	parse_data.c	/^errors get_message(char *data)$/;"	f
+get_word	parse_data.c	/^uint32_t get_word(char *cli_data, char* ret_word, CLI cmd_in, uint32_t pos)$/;"	f
+handle_errors	error_handling.c	/^void handle_errors(debug error_handle)$/;"	f
+init_PWM_Blue	led.c	/^void init_PWM_Blue(uint16_t pulse)$/;"	f
+init_PWM_Green	led.c	/^void init_PWM_Green(uint16_t pulse)$/;"	f
+init_PWM_Red	led.c	/^void init_PWM_Red(uint16_t pulse)$/;"	f
+init_uart	uart.c	/^void init_uart()$/;"	f
+intToStr	ftoa.c	/^int intToStr(int x, char *str, int d)$/;"	f
+little_to_big	data.c	/^int32_t little_to_big(int32_t data)$/;"	f
+main	main.c	/^int main(void)$/;"	f
+modify_intensity	parse_data.c	/^errors modify_intensity(ledcolors color)$/;"	f
+my_atoi	data.c	/^int32_t my_atoi(char *str)$/;"	f
+my_ftoa	ftoa.c	/^void my_ftoa(float n, char *res, int afterpoint)$/;"	f
+my_itoa	data.c	/^int8_t *my_itoa(int8_t *str, int32_t data, int32_t base)$/;"	f
+my_memmove	memory.c	/^int8_t my_memmove(uint8_t *src, uint8_t *dst, uint32_t length) {$/;"	f
+my_memmove_dma	dma.c	/^debug my_memmove_dma(uint8_t *src, uint8_t *dst, uint32_t length)$/;"	f
+my_memzero	memory.c	/^int8_t my_memzero(uint8_t *src, uint32_t length) {$/;"	f
+my_memzero_dma	dma.c	/^debug my_memzero_dma(uint8_t *src, uint32_t length)$/;"	f
+my_reverse	memory.c	/^int8_t my_reverse(uint8_t *src, uint8_t length)$/;"	f
+parse_CLI	parse_data.c	/^errors parse_CLI(char *cli_data, CLI *cmd_in)$/;"	f
+parse_CLI	parse_data.c	/^errors parse_CLI(char *str_data, CLI *command_in)$/;"	f
+set_CLI_commands	parse_data.c	/^static char *set_CLI_commands(cmds command)$/;"	f	file:
+set_CLI_ledcolors	parse_data.c	/^static char *set_CLI_ledcolors(ledcolors colors)$/;"	f	file:
+set_union_values	parse_data.c	/^errors set_union_values(CLI *cmd_in, char *word)$/;"	f
+spi_0_init	spi.c	/^void spi_0_init(void)$/;"	f
+spi_1_init	spi.c	/^void spi_1_init(void)$/;"	f
+start_counter	timer.c	/^void start_counter()$/;"	f
+start_dma_transfer	dma.c	/^debug start_dma_transfer()$/;"	f
+stop_counter	timer.c	/^void stop_counter()$/;"	f
+time_diff	timer.c	/^double time_diff(struct timeval before, struct timeval after)$/;"	f
+turn_off_all_leds	led.c	/^void turn_off_all_leds()$/;"	f
+turn_on_leds	led.c	/^void turn_on_leds(ledcolors color)$/;"	f
+wait_for_buffer_empty	uart.c	/^void wait_for_buffer_empty()$/;"	f
+wait_for_buffer_full	uart.c	/^void wait_for_buffer_full()$/;"	f
