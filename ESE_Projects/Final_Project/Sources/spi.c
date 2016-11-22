@@ -43,7 +43,9 @@ void spi_0_init(void)
 	SIM_SCGC5 |= SET_CLK_GATE_PORT_C;
 
 	/* Enable the ALT mux for the GPIO pins */
-	PORTC_PCR4 = CONFIG_PORTC4_GPIO;
+        PORTC_PCR11 = CONFIG_PORTC11_GPIO; //config as CE pin.
+        
+        PORTC_PCR4 = CONFIG_PORTC4_GPIO;
 	PORTC_PCR5 = CONFIG_PORTC5_SPI_SCK;
 	PORTC_PCR6 = CONFIG_PORTC6_SPI_MOSI;
 	PORTC_PCR7 = CONFIG_PORTC7_SPI_MISO;
@@ -51,12 +53,39 @@ void spi_0_init(void)
 	/*Config direction of GPIO PORTC4 as output*/
 	GPIOC_PDDR |= CONFIG_PORTC4_DIR_OUT;
 
+        /* Config direction of GPIO PORTC11 as output */
+        GPIOC_PDDR |= CONFIG_PORTC11_DIR_OUT;
+
 	/*Config the Baud Rate for SPI0 comm.*/	
 	SPI_BR_REG(SPI0) = SPI0_BAUD_RATE;
 
 	/* Config the C1 SPI0 register as the master connection */
 	SPI0->C1 = SPI0_C1_CONFIG;
 
+}
+
+/*Config pin 19 as the CE*/
+void config_spi0_CE(void)
+{
+    /*Enable the clock gate for PORTD */
+    SIM_SCGC5 |= SET_CLK_GATE_PORT_D;
+    
+    /*Config PORTD_PCR4 as GPIO*/
+    PORTD_PCR4 = CONFIG_PORTD4_GPIO;
+
+    /* Config the direction of the GPIO PORTD4 as output */
+    GPIOD_PDDR |= CONFIG_PORTD4_DIR_OUT;
+
+}
+
+void pin6_CE_High(void)
+{
+    Pull_CS_High_SPI1()
+}
+
+void pin6_CE_Low(void)
+{
+    Pull_CS_Low_SPI1()
 }
 
 uint8_t Read_Single_Byte(uint8_t *cmd, uint8_t *ret_value)
@@ -72,8 +101,42 @@ uint8_t Read_Single_Byte(uint8_t *cmd, uint8_t *ret_value)
 	} else {
 		return nRF_READ_FAILURE;
 	}
-
 }
+
+#if 0
+uint8_t Read_Single_Byte_SPI1(uint8_t *cmd, uint8_t *ret_value)
+{
+	if (cmd == NULL) {
+		return NULL_FAILURE;
+	}
+
+	//*ret_value = Read_from_nRF_Register(cmd);
+	
+        Pull_CS_Low_SPI1();
+	//Send_Read_Write_Command(reg_addr);
+
+	while(WAIT_FOR_SPTEF_SPI1);
+	SPI1->D = *cmd;
+	while(WAIT_FOR_SPRF_SPI1);
+	ret_value = SPI1->D;
+
+	delay(10);
+
+	//return_nRF_value = Send_Dummy_Byte();
+
+	while(WAIT_FOR_SPTEF_SPI1);
+	SPI1->D = NOP;
+	while(WAIT_FOR_SPRF_SPI1);
+	ret_value = SPI1->D;
+	Pull_CS_High_SPI1();
+
+	if(ret_value!=NULL){
+		return nRF_READ_SUCCESSFUL;
+	} else {
+		return nRF_READ_FAILURE;
+	}
+}
+#endif
 
 uint8_t Read_5_Bytes(uint8_t *cmd, uint8_t *ret_value)
 {
@@ -92,7 +155,6 @@ uint8_t Read_5_Bytes(uint8_t *cmd, uint8_t *ret_value)
 	} else {
 		return nRF_READ_FAILURE;
 	}
-
 }
 
 uint8_t Read_5_Bytes_SPI1(uint8_t *cmd, uint8_t *ret_value)

@@ -34,7 +34,6 @@
 #define DEBUG
 #define SPI0_Rx_nRF_Comm
 
-
 int main(void)
 {
 
@@ -45,119 +44,51 @@ int main(void)
     uint8_t reg_addr;
     uint8_t write_value;
     uint8_t ret_debug_handle = 0;
-    //uint8_t out[5] = {0};
     uint8_t out = 0;
     uint8_t return_val = 0;
     uint8_t cntr = 0;
+    int8_t reg_value = 0x00;
 
     spi_0_init();
+    config_spi0_CE();
 
-    /* Writing to EN_AA */
-    reg_addr = W_REGISTER | EN_AA;
-    write_value = 0x00; // Disabling auto ack
-    Write_to_nRF_Register(&reg_addr, write_value);
+    nRF_ops(Write_to_nRF, 0x3F, EN_AA);
+    nRF_ops(Write_to_nRF, 0x03, EN_RXADDR);
+    nRF_ops(Write_to_nRF, 0x03, SETUP_AW);
+    nRF_ops(Write_to_nRF, 0x03, SETUP_RETR);
+    nRF_ops(Write_to_nRF, 0x4C, RF_CH);
+    nRF_ops(Write_to_nRF, 0x03, RF_SETUP);
+    nRF_ops(Write_to_nRF, 0x20, RX_PW_P0);
+    nRF_ops(Write_to_nRF, 0x1F, CONFIG);
+    
+    
+    nRF_ops(Read_from_nRF, reg_value, EN_AA);
+    nRF_ops(Read_from_nRF, reg_value, EN_RXADDR);
+    nRF_ops(Read_from_nRF, reg_value, RF_SETUP);
+    nRF_ops(Read_from_nRF, reg_value, CONFIG);
 
-#ifdef DEBUG
-    /* Now reading the value to verify! */
-    reg_addr = R_REGISTER | EN_AA;
-    ret_debug_handle = Read_Single_Byte(&reg_addr, &return_val);
-    MY_LOG_PARAMS("Read Operation Output: ", return_val);
-    MY_LOG("\n");
-#endif
-
-    /* Writing to EN_RXADDR */
+#if 0
+    /* XXX: Leaving this snippet here for Ref.! */
     reg_addr = W_REGISTER | EN_RXADDR;
-    write_value = 0x03;
+    write_value = 0x03;// Set PWR_UP and PRIM_RX
+    //write_value = 0x1F;// Set PWR_UP and PRIM_RX
     Write_to_nRF_Register(&reg_addr, write_value);
 
 #ifdef DEBUG
     /* Now reading the value to verify! */
     reg_addr = R_REGISTER | EN_RXADDR;
     ret_debug_handle = Read_Single_Byte(&reg_addr, &return_val);
-    MY_LOG_PARAMS("Read Operation Output(post write) EN_RXADDR: ", return_val);
-    MY_LOG("\n");
-#endif
-
-    /* Writing to SETUP_AW */
-    reg_addr = W_REGISTER | SETUP_AW;
-    write_value = 0x03;
-    Write_to_nRF_Register(&reg_addr, write_value);
-
-#ifdef DEBUG
-    /* Now reading the value to verify! */
-    reg_addr = R_REGISTER | SETUP_AW;
-    ret_debug_handle = Read_Single_Byte(&reg_addr, &return_val);
-    MY_LOG_PARAMS("Read Operation Output(post write) SETUP_AW: ", return_val);
-    MY_LOG("\n");
-#endif
-
-    /* Writing to SETUP_RETR */
-    reg_addr = W_REGISTER | SETUP_RETR;
-    write_value = 0x03; 
-    Write_to_nRF_Register(&reg_addr, write_value);
-
-#ifdef DEBUG
-    /* Now reading the value to verify! */
-    reg_addr = R_REGISTER | SETUP_RETR;
-    ret_debug_handle = Read_Single_Byte(&reg_addr, &return_val);
-    MY_LOG_PARAMS("Read Operation Output(post write) SETUP_RETR: ", return_val);
-    MY_LOG("\n");
-#endif
-
-    /* Writing to RF_CH */ 
-    reg_addr = W_REGISTER | RF_CH;
-    write_value = 0x02;
-    Write_to_nRF_Register(&reg_addr, write_value);
-
-#ifdef DEBUG
-    /* Now reading the value to verify! */
-    reg_addr = R_REGISTER | RF_CH;
-    ret_debug_handle = Read_Single_Byte(&reg_addr, &return_val);
-    MY_LOG_PARAMS("Read Operation Output(post write) RF_CH: ", return_val);
-    MY_LOG("\n");
-#endif
-
-    /* Writing to RF_SETUP */
-    reg_addr = W_REGISTER | RF_SETUP;//Check this config. DR_HIGH fr 250kbps.
-    write_value = 0x0F;
-    Write_to_nRF_Register(&reg_addr, write_value);
-
-#ifdef DEBUG
-    /* Now reading the value to verify! */
-    reg_addr = R_REGISTER | RF_SETUP;
-    ret_debug_handle = Read_Single_Byte(&reg_addr, &return_val);
-    MY_LOG_PARAMS("Read Operation Output(post write) RF_SETUP: ", return_val);
-    MY_LOG("\n");
-#endif
-
-    /* Next, set the payload width! */
-
-    reg_addr = W_REGISTER | RX_PW_P0;
-    write_value = 0x01; //Setting the payload width to 1.
-    Write_to_nRF_Register(&reg_addr, write_value);
-
-#ifdef DEBUG
-    /* Now reading the value to verify! */
-    reg_addr = R_REGISTER | RX_PW_P0;
-    ret_debug_handle = Read_Single_Byte(&reg_addr, &return_val);
-    MY_LOG_PARAMS("Read Operation Output(post write) RX_PW_P0: ", return_val);
-    MY_LOG("\n");
-#endif
-
-    /* Config as either Tx/Rx and PWR up the module! */
-    /* Next, need to write to the CONFIG register */
-
-    reg_addr = W_REGISTER | 0x00;
-    write_value = 0x03;// Set PWR_UP and PRIM_RX
-    Write_to_nRF_Register(&reg_addr, write_value);
-
-#ifdef DEBUG
-    /* Now reading the value to verify! */
-    reg_addr = R_REGISTER | 0x00;
-    ret_debug_handle = Read_Single_Byte(&reg_addr, &return_val);
     MY_LOG_PARAMS("Read Operation Output(post write) CONFIG: ", return_val);
     MY_LOG("\n");
 #endif
+#endif
+
+    while(1) {
+        pin6_CE_High();
+        delay(200);
+        pin6_CE_Low();
+        return 0;
+    }
 
 #endif
 
@@ -217,6 +148,7 @@ int main(void)
 	spi_0_init();
 
 	/*Config. the register address*/
+	//uint8_t reg_addr = R_REGISTER | TX_ADDR;
 	uint8_t reg_addr = R_REGISTER | TX_ADDR;
 
 	/*Config the value to be written to that register*/
@@ -326,9 +258,7 @@ int main(void)
 	debug dma_ret_handle;
 
 	/*Initialize the counter*/
-	//start_counter();
 	dma_ret_handle = my_memmove_dma( src, dst, len);
-	//stop_counter();
 	#ifdef DEBUG
 		handle_errors(dma_ret_handle);
 	#endif

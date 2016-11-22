@@ -9,7 +9,10 @@
 #define INCLUDES_SPI_MASKS_H_
 
 #define WAIT_FOR_SPTEF ( !(SPI_S_REG(SPI0) & SPI_S_SPTEF_MASK))
+#define WAIT_FOR_SPTEF_SPI1 ( !(SPI_S_REG(SPI1) & SPI_S_SPTEF_MASK))
+
 #define WAIT_FOR_SPRF ( !(SPI_S_REG(SPI0) & SPI_S_SPRF_MASK))
+#define WAIT_FOR_SPRF_SPI1 ( !(SPI_S_REG(SPI1) & SPI_S_SPRF_MASK))
 
 /*Function: Pull_CS_Low()
  * Parameters: void
@@ -48,6 +51,9 @@
 #define SET_SPI0_CLK_GATE 0x00400000
 #define SET_CLK_GATE_PORT_C 0x00000800
 
+#define CONFIG_PORTC11_GPIO 0x00000100
+#define CONFIG_PORTC11_DIR_OUT 0x00000800
+
 #define CONFIG_PORTC4_GPIO 0x00000100
 #define CONFIG_PORTC4_DIR_OUT 0x00000010
 
@@ -61,23 +67,23 @@
 
 /* Command Word Masks */
 
-#define R_REGISTER 0x00 		/* 000A_AAAA; A->Address */
-#define W_REGISTER 0x20 		/* 001A_AAAA */
-#define R_RX_PAYLOAD 0x61 		/* 0110_0001 - Fixed */
-#define W_TXAYLOAD 0XA0 		/* 1010_0000 - Fixed */
-#define FLUSH_TX 0xE1 			/* 1110_0001 - Fixed */
-#define FLUSH_RX 0xE2 			/* 1110_0010 - Fixed */
-#define REUSE_TX_PL 0xE3		/* 1110_0011 - Fixed */
-#define R_RX_PL_WID 0x60 		/* 0110_0000 - Fixed */
+#define R_REGISTER 0x00 	/* 000A_AAAA; A->Address */
+#define W_REGISTER 0x20 	/* 001A_AAAA */
+#define R_RX_PAYLOAD 0x61 	/* 0110_0001 - Fixed */
+#define W_TXAYLOAD 0XA0 	/* 1010_0000 - Fixed */
+#define FLUSH_TX 0xE1 		/* 1110_0001 - Fixed */
+#define FLUSH_RX 0xE2 		/* 1110_0010 - Fixed */
+#define REUSE_TX_PL 0xE3	/* 1110_0011 - Fixed */
+#define R_RX_PL_WID 0x60 	/* 0110_0000 - Fixed */
 
-#define W_ACK_PAYLOAD 0xA8		/* 1010_1PPP; PPP -> 000 */
+#define W_ACK_PAYLOAD 0xA8	/* 1010_1PPP; PPP -> 000 */
 
 #define W_TX_PAYLOAD_NOACK 0xB0 /* 1011_0000 - Fixed */
-#define NOP 0xFF 				/* 1111_1111 - Fixed */
+#define NOP 0xFF 		/* 1111_1111 - Fixed */
 
 /* Register Map Definitions */
 
-enum register_defs_t {
+typedef enum register_defs_t {
     CONFIG         = 0x00,    
     EN_AA          = 0x01,
     EN_RXADDR      = 0x02,

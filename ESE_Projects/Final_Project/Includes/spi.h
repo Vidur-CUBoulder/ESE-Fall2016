@@ -72,4 +72,13 @@ uint8_t Read_5_Bytes(uint8_t *cmd, uint8_t *ret_value);
 
 uint8_t Read_5_Bytes_SPI1(uint8_t *cmd, uint8_t *ret_value);
 
+/* Trial Functions */
+
+void config_spi0_CE(void);
+
+void pin6_CE_High(void);
+
+void pin6_CE_Low(void);
+
+
 #endif /* INCLUDES_SPI_H_ */
