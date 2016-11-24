@@ -17,7 +17,7 @@ typedef enum debug_e {
 	BES_BIT_SET,
 	BED_BIT_SET,
 	LENGTH_ERROR, //More than what is possible was entered!
-}debug;
+} debug;
 
 void handle_errors(debug error_handle);
 

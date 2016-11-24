@@ -67,19 +67,19 @@
 
 /* Command Word Masks */
 
-#define R_REGISTER 0x00 	/* 000A_AAAA; A->Address */
-#define W_REGISTER 0x20 	/* 001A_AAAA */
-#define R_RX_PAYLOAD 0x61 	/* 0110_0001 - Fixed */
-#define W_TXAYLOAD 0XA0 	/* 1010_0000 - Fixed */
-#define FLUSH_TX 0xE1 		/* 1110_0001 - Fixed */
-#define FLUSH_RX 0xE2 		/* 1110_0010 - Fixed */
-#define REUSE_TX_PL 0xE3	/* 1110_0011 - Fixed */
-#define R_RX_PL_WID 0x60 	/* 0110_0000 - Fixed */
+#define R_REGISTER              0x00 	/* 000A_AAAA; A->Address */
+#define W_REGISTER              0x20 	/* 001A_AAAA */
+#define R_RX_PAYLOAD            0x61 	/* 0110_0001 - Fixed */
+#define W_TXAYLOAD              0XA0 	/* 1010_0000 - Fixed */
+#define FLUSH_TX                0xE1 	/* 1110_0001 - Fixed */
+#define FLUSH_RX                0xE2 	/* 1110_0010 - Fixed */
+#define REUSE_TX_PL             0xE3	/* 1110_0011 - Fixed */
+#define R_RX_PL_WID             0x60 	/* 0110_0000 - Fixed */
 
-#define W_ACK_PAYLOAD 0xA8	/* 1010_1PPP; PPP -> 000 */
+#define W_ACK_PAYLOAD           0xA8	/* 1010_1PPP; PPP -> 000 */
 
-#define W_TX_PAYLOAD_NOACK 0xB0 /* 1011_0000 - Fixed */
-#define NOP 0xFF 		/* 1111_1111 - Fixed */
+#define W_TX_PAYLOAD_NOACK      0xB0    /* 1011_0000 - Fixed */
+#define NOP                     0xFF    /* 1111_1111 - Fixed */
 
 /* Register Map Definitions */
 

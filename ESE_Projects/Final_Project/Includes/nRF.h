@@ -8,6 +8,31 @@
 #ifndef INCLUDES_NRF_H_
 #define INCLUDES_NRF_H_
 
+#include "error_handling.h"
+#include "spi_masks.h"
+
+typedef enum errors_t {
+	SUCCESSFUL,
+	INCORRECT_ENTRY,
+	NULL_FAILURE,
+	INVALID,
+	INVALID_RET_FROM_nRF,
+	nRF_READ_SUCCESSFUL,
+	nRF_READ_FAILURE
+} errors;
+
+typedef struct nRF_ops_t {
+    reg_map nrf_register;
+    int8_t reg_value;
+    int8_t read_value;
+    int8_t write_value;
+
+    /*Function Pointers*/
+    errors (*send_command)(uint8_t); 
+    errors (*read_write_ops)(reg_map, uint8_t);
+
+} nRF_ops;
+
 /* Function: Send_Read_Write_Command(uint8_t *cmd)
  * Parameters: Command byte that has to be sent to the nRF module.
  * This could be either for reading or writing.
@@ -43,7 +68,7 @@ uint8_t Send_Write_Value(uint8_t write_value);
  * Description: a function pointer to a particular function. Can be used to call
  *              functions to read from or write to a particular register in the nRF.
  */
-int8_t (*ops_type)(int8_t, reg_map);
+int8_t (*ops_type)(reg_map, int8_t *);
 
 /*Function: nRF_ops(int8_t (*ops_type)(int8_t, reg_map), int8_t reg_value, reg_map reg)
  * Paramters:
@@ -55,7 +80,7 @@ int8_t (*ops_type)(int8_t, reg_map);
  * Description: This is an aggregation function for the various types of read/write
  *              operations that can be performed on the nRF module.
  */
-int8_t nRF_ops(int8_t (*ops_type)(int8_t, reg_map), int8_t reg_value, reg_map reg);
+//int8_t nRF_ops(int8_t (*ops_type)(reg_map, int8_t *), reg_map reg, int8_t *reg_value);
 
 /*Function: Write_to_nRF(int8_t reg_value, reg_map reg);
  * Parameters: 
@@ -64,16 +89,27 @@ int8_t nRF_ops(int8_t (*ops_type)(int8_t, reg_map), int8_t reg_value, reg_map re
  * Return: a debug handle
  * Description: function to write a value into a given register
  */
-int8_t Write_to_nRF(int8_t reg_value, /*int8_t*/reg_map reg);
+int8_t Write_to_nRF(/*int8_t*/reg_map reg, int8_t *reg_value);
 
-/*Function:Read_from_nRF(int8_t reg_value, reg_map reg)
+/*Function:Read_from_nRF(reg_map reg, int8_t *reg_value)
  * Parameters:
  *      a. reg_value: value that has been read from the given register
  *      b. reg_map reg: register whose value you want to read.
  * Return: a debug handle
  * Description: function to read the value stored in the register.
  */
-int8_t Read_from_nRF(int8_t reg_value, reg_map reg);
+int8_t Read_from_nRF(reg_map reg, int8_t *reg_value);
 
+void setup_begin_config(); 
+
+void setup_nRF_radio();
+
+int8_t Flush_RX(void);
+
+int8_t Flush_TX(void);
+
+int8_t Abs_Write_5B_to_nRF_Register(reg_map reg, uint8_t *value);
+
+void loop();
 
 #endif /* INCLUDES_NRF_H_ */

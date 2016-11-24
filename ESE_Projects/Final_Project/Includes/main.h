@@ -8,6 +8,7 @@
 #ifndef INCLUDES_MAIN_H_
 #define INCLUDES_MAIN_H_
 
+#include "MKL25Z4.h"
 #include "uart.h"
 #include "dma.h"
 #include "error_handling.h"
@@ -15,6 +16,6 @@
 #include "timer.h"
 #include "parse_data.h"
 #include "spi.h"
-#include "MKL25Z4.h"
+#include "nRF.h"
 
 #endif /* INCLUDES_MAIN_H_ */

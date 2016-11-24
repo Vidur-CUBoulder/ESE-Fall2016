@@ -30,42 +30,14 @@
 
 #include "main.h"
 
-//#define SPI_Read_Write_Working
+#define SPI_Read_Write_Working
 #define DEBUG
-#define SPI0_Rx_nRF_Comm
+//#define SPI0_Rx_nRF_Comm
 
 int main(void)
 {
 
 #ifdef SPI0_Rx_nRF_Comm
-
-    /* Config nRF for Rx */
-
-    uint8_t reg_addr;
-    uint8_t write_value;
-    uint8_t ret_debug_handle = 0;
-    uint8_t out = 0;
-    uint8_t return_val = 0;
-    uint8_t cntr = 0;
-    int8_t reg_value = 0x00;
-
-    spi_0_init();
-    config_spi0_CE();
-
-    nRF_ops(Write_to_nRF, 0x3F, EN_AA);
-    nRF_ops(Write_to_nRF, 0x03, EN_RXADDR);
-    nRF_ops(Write_to_nRF, 0x03, SETUP_AW);
-    nRF_ops(Write_to_nRF, 0x03, SETUP_RETR);
-    nRF_ops(Write_to_nRF, 0x4C, RF_CH);
-    nRF_ops(Write_to_nRF, 0x03, RF_SETUP);
-    nRF_ops(Write_to_nRF, 0x20, RX_PW_P0);
-    nRF_ops(Write_to_nRF, 0x1F, CONFIG);
-    
-    
-    nRF_ops(Read_from_nRF, reg_value, EN_AA);
-    nRF_ops(Read_from_nRF, reg_value, EN_RXADDR);
-    nRF_ops(Read_from_nRF, reg_value, RF_SETUP);
-    nRF_ops(Read_from_nRF, reg_value, CONFIG);
 
 #if 0
     /* XXX: Leaving this snippet here for Ref.! */
@@ -83,57 +55,6 @@ int main(void)
 #endif
 #endif
 
-    while(1) {
-        pin6_CE_High();
-        delay(200);
-        pin6_CE_Low();
-        return 0;
-    }
-
-#endif
-
-#if 0
-
-	spi_0_init(); //Init. the SPI.
-
-	/*Config PORTD pin19 as GPIO for CE on nRF*/
-	SIM_SCGC5 |= 0x00001000;
-
-	PORTD_PCR7 |= 0x00000100;
-
-	GPIOD_PDDR |= 0x00000080;
-
-	GPIOD_PCOR |= 0x00000080;
-
-	/*First fill RX_ADDR_P0 with 0xE7E7E7E7E7 same as TX.
-	 * This is set to that register by default. So not doing anything.*/
-
-	/*Enable AA for Pipe0*/
-	Write_to_nRF_Register(EN_AA, 0x01);
-
-	/*Enable Pipe0*/
-	Write_to_nRF_Register(EN_RXADDR, 0x01);
-
-	/*Select RF Channel as 76*/
-	Write_to_nRF_Register(RF_CH, 0x4C);
-
-	/*Select the same RX payload width as the TX payload width*/
-	Write_to_nRF_Register(RX_PW_P0, 0x01);
-
-	/*config RF_SETUP*/
-	Write_to_nRF_Register(RF_SETUP, 0x60);
-
-	/*set the CONFIG register*/
-	Write_to_nRF_Register(0x07, 0x0F);
-
-	GPIOD_PSOR |= 0x00000080; // Pull the CE pin high.
-
-	while(1) {
-		if (Read_from_nRF_Register(R_RX_PAYLOAD) == 0x01) { //FIXME: check, may not be correct
-			return 0;
-		}
-	}
-
 #endif
 
 #ifdef SPI_Read_Write_Working
@@ -147,25 +68,17 @@ int main(void)
 	/* Init. SPI */
 	spi_0_init();
 
-	/*Config. the register address*/
-	//uint8_t reg_addr = R_REGISTER | TX_ADDR;
-	uint8_t reg_addr = R_REGISTER | TX_ADDR;
-
 	/*Config the value to be written to that register*/
 	uint8_t write_value = 0x11;
 
-	ret_debug_handle = Read_5_Bytes(&reg_addr, &return_val[0]);
+	ret_debug_handle = Read_5_Bytes(TX_ADDR, &return_val[0]);
 	for(cntr=0; cntr<5; cntr++){
 		out[cntr] = return_val[cntr];
 		MY_LOG_PARAMS("Write Operation Output: ", out[cntr]);
 	}
-	//MY_LOG_PARAMS("Read Operation Output: ", out[0]);
 	MY_LOG("\n");
 
-	/*Change config to write*/
-	reg_addr = W_REGISTER | TX_ADDR;
-
-	ret_debug_handle = Write_to_nRF_Register(&reg_addr, write_value);
+	ret_debug_handle = Write_to_nRF_Register(TX_ADDR, write_value);
 	for(cntr=0; cntr<5; cntr++){
 			out[cntr] = return_val[cntr];
 	}
@@ -173,9 +86,8 @@ int main(void)
 	MY_LOG("\n");
 
 	/* Read agian from the register */
-	reg_addr = R_REGISTER | TX_ADDR;
 
-	ret_debug_handle = Read_5_Bytes(&reg_addr, &return_val[0]);
+	ret_debug_handle = Read_5_Bytes(TX_ADDR, &return_val[0]);
 	for(cntr=0; cntr<5; cntr++){
 		out[cntr] = return_val[cntr];
 	}

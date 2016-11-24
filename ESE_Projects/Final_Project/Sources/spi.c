@@ -138,17 +138,28 @@ uint8_t Read_Single_Byte_SPI1(uint8_t *cmd, uint8_t *ret_value)
 }
 #endif
 
-uint8_t Read_5_Bytes(uint8_t *cmd, uint8_t *ret_value)
+errors Read_5_Bytes(reg_map reg, uint8_t *ret_value)
 {
-	if (cmd == NULL || ret_value == NULL) {
+	if (ret_value == NULL) {
 		return NULL_FAILURE;
 	}
 
 	uint8_t cntr = 0;
+        uint8_t i = 0;
+        uint8_t temp_val = 0;
+
+        uint8_t cmd = R_REGISTER | reg;
+        
+        Pull_CS_Low();
+        Send_Read_Write_Command(&cmd);
+        
+        delay(10);
 
 	for(cntr = 0; cntr < MAX_REG_LENGTH; cntr++) {
-		*(ret_value+cntr) = Read_from_nRF_Register(cmd);
-	}
+            *(ret_value+cntr) = Send_Dummy_Byte();
+        }
+
+        Pull_CS_High();
 
 	if(ret_value != NULL) {
 		return nRF_READ_SUCCESSFUL;
@@ -212,7 +223,7 @@ uint8_t Read_from_nRF_Register_SPI1(uint8_t *reg_addr)
 uint8_t Read_from_nRF_Register(uint8_t *reg_addr)
 {
 	if(reg_addr == NULL) {
-		return NULL_FAILURE;
+	    return NULL_FAILURE;
 	}
 
 	uint8_t return_nRF_value = 0;
@@ -228,21 +239,50 @@ uint8_t Read_from_nRF_Register(uint8_t *reg_addr)
 	return return_nRF_value;
 
 }
-
-uint8_t Write_to_nRF_Register(uint8_t *reg_addr, uint8_t write_value)
+ 
+int8_t Abs_Write_to_nRF_Register(reg_map reg, int8_t write_value)
 {
-	if(reg_addr == NULL) {
-		return NULL_FAILURE;
-	}
-
 	uint8_t return_nRF_value = 0;
-
+        uint8_t final_write_value = 0;
+        uint8_t reg_addr = 0;
+    
+        reg_addr = W_REGISTER | reg;
+        
 	Pull_CS_Low();
-	Send_Read_Write_Command(reg_addr);
+	Send_Read_Write_Command(&reg_addr);
 
 	delay(10);
 
 	return_nRF_value = Send_Write_Value(write_value);
+	Pull_CS_High();
+
+	return return_nRF_value;
+
+}
+uint8_t Write_to_nRF_Register(reg_map reg, uint8_t write_value)
+{
+        /* First read the present value in the register
+         * and then OR it with the new value. This is the proper
+         * way of writting to registers.
+         */
+        
+	uint8_t return_nRF_value = 0;
+        uint8_t read_reg_value = 0;
+        uint8_t final_write_value = 0;
+        uint8_t reg_addr = 0;
+    
+        reg_addr = R_REGISTER | reg;
+        read_reg_value = Read_from_nRF_Register(&reg_addr);
+        
+        reg_addr = W_REGISTER | reg;
+        final_write_value = write_value | read_reg_value; 
+        
+	Pull_CS_Low();
+	Send_Read_Write_Command(&reg_addr);
+
+	delay(10);
+
+	return_nRF_value = Send_Write_Value(final_write_value);
 	Pull_CS_High();
 
 	return return_nRF_value;

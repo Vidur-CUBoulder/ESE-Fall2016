@@ -17,24 +17,15 @@
 #include "data.h"
 #include "led.h"
 #include "error_handling.h"
+#include "nRF.h"
 
 #define UART_STOP_BYTE 0x23
 
-typedef enum errors_t {
-	SUCCESSFUL,
-	INCORRECT_ENTRY,
-	NULL_FAILURE,
-	INVALID,
-	INVALID_RET_FROM_nRF,
-	nRF_READ_SUCCESSFUL,
-	nRF_READ_FAILURE
-} errors;
-
 typedef enum cmds_t {
-	commands 		= 0,
-	baudrate 		= 1,
-	ledcolor 		= 2,
-	intensity 		= 3,
+	commands 	= 0,
+	baudrate 	= 1,
+	ledcolor 	= 2,
+	intensity 	= 3,
 	kill_program 	= 4
 } cmds;
 

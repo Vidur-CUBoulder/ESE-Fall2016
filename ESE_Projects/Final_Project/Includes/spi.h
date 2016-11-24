@@ -37,7 +37,7 @@ uint8_t Read_from_nRF_Register(uint8_t *reg_addr);
 
 uint8_t Read_from_nRF_Register_SPI1(uint8_t *reg_addr);
 
-/*Function: Write_to_nRF_Register(uint8_t *reg_addr, uint8_t write_value)
+/*Function: Write_to_nRF_Register(reg_map reg, uint8_t write_value)
  * Paramters: reg_addr:  This is the addr. of the register that you want to write to
  * 			  write_value: This is the value that you want to write to the register
  * 			  			   specified in reg_addr.
@@ -46,7 +46,7 @@ uint8_t Read_from_nRF_Register_SPI1(uint8_t *reg_addr);
  * Description: This is the write aggregation function for the nRF module. It
  * should be used to write to a particular register in the nRF module.
  */
-uint8_t Write_to_nRF_Register(uint8_t *reg_addr, uint8_t write_value);
+uint8_t Write_to_nRF_Register(reg_map reg, uint8_t write_value);
 
 /*Function: uint8_t Read_Single_Byte(uint8_t *cmd, uint8_t *ret_value);
  * Parameters:
@@ -59,16 +59,16 @@ uint8_t Write_to_nRF_Register(uint8_t *reg_addr, uint8_t write_value);
  */
 uint8_t Read_Single_Byte(uint8_t *cmd, uint8_t *ret_value);
 
-/*Function: uint8_t Read_5_Bytes(uint8_t *cmd, uint8_t *ret_value);
+/*Function: uint8_t Read_5_Bytes(reg_map reg, uint8_t *ret_value);
  * Parameters:
- * 		a. cmd: pass the struct where all the data is organized.
+ * 		a. reg: pass the register that you want to read.
  * 		b. ret_value: the final return value from the function after it has done
  * 				all the processing.
  * Return: an enum that may be used for debugging purposes.
  * Description: this function can be used to read from registers on the nRF
  * 			that are 5 bytes long. It pushed 5 NOP bytes to the module.
  */
-uint8_t Read_5_Bytes(uint8_t *cmd, uint8_t *ret_value);
+errors Read_5_Bytes(reg_map reg, uint8_t *ret_value);
 
 uint8_t Read_5_Bytes_SPI1(uint8_t *cmd, uint8_t *ret_value);
 
@@ -80,5 +80,6 @@ void pin6_CE_High(void);
 
 void pin6_CE_Low(void);
 
+int8_t Abs_Write_to_nRF_Register(reg_map reg, int8_t write_value);
 
 #endif /* INCLUDES_SPI_H_ */
