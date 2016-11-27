@@ -8,6 +8,8 @@
 #ifndef INCLUDES_SPI_MASKS_H_
 #define INCLUDES_SPI_MASKS_H_
 
+#include "MKL25Z4.h"
+
 #define WAIT_FOR_SPTEF ( !(SPI_S_REG(SPI0) & SPI_S_SPTEF_MASK))
 #define WAIT_FOR_SPTEF_SPI1 ( !(SPI_S_REG(SPI1) & SPI_S_SPTEF_MASK))
 
@@ -18,25 +20,27 @@
  * Parameters: void
  * Description: Pull the CS line low and start the SPI transmission.
  */
-#define Pull_CS_Low() GPIOC_PCOR = 0x00000010;
+#define Pull_CS_Low() GPIOC_PCOR = 0x00000010
 
-#define Pull_CS_Low_SPI1() GPIOD_PCOR = 0x00000010;
+#define Pull_CS_Low_SPI1() GPIOD_PCOR = 0x00000010
 
 /*Function: Pull_CS_High()
  * Parameters: void
  * Description: Pull the CS line high and stop the SPI transmission.
  */
-#define Pull_CS_High() GPIOC_PSOR = 0x00000010;
+#define Pull_CS_High() GPIOC_PSOR = 0x00000010
 
-#define Pull_CS_High_SPI1() GPIOD_PSOR = 0x00000010;
+#define Pull_CS_High_SPI1() GPIOD_PSOR = 0x00000010
 
 /* SPI1 Initialization Macrons */
 
 #define SET_SPI1_CLK_GATE 0x00800000
 #define SET_CLK_GATE_PORT_D 0x00001000
 
+#define CONFIG_PORTD3_GPIO 0x00000100
 #define CONFIG_PORTD4_GPIO 0x00000100
 #define CONFIG_PORTD4_DIR_OUT 0x00000010 
+#define CONFIG_PORTD3_DIR_OUT 0x00000008 
 
 #define CONFIG_PORTD5_SPI_SCK 0x00000200
 #define CONFIG_PORTD6_SPI_MOSI 0x00000200
@@ -51,10 +55,11 @@
 #define SET_SPI0_CLK_GATE 0x00400000
 #define SET_CLK_GATE_PORT_C 0x00000800
 
-#define CONFIG_PORTC11_GPIO 0x00000100
+#define CONFIG_PORTC3_GPIO 0x00000100
 #define CONFIG_PORTC11_DIR_OUT 0x00000800
 
 #define CONFIG_PORTC4_GPIO 0x00000100
+#define CONFIG_PORTC3_DIR_OUT 0x00000008
 #define CONFIG_PORTC4_DIR_OUT 0x00000010
 
 #define CONFIG_PORTC5_SPI_SCK 0x00000200

@@ -42,6 +42,8 @@ typedef struct nRF_ops_t {
  */
 uint8_t Send_Read_Write_Command(uint8_t *cmd);
 
+uint8_t Send_Read_Write_Command_SPI1(uint8_t *cmd);
+
 /*Function: Send_Dummy_Byte(void)
  * Parameters: void
  * Return: Value returned by the nRF module
@@ -59,6 +61,8 @@ uint8_t Send_Dummy_Byte(void);
  * Failure to do this will result in an unexpected behavior.
  */
 uint8_t Send_Write_Value(uint8_t write_value);
+
+uint8_t Send_Write_Value_SPI1(uint8_t write_value);
 
 /*Function:(*ops_type)(int8_t, reg_map)
  * Parameters: 
@@ -98,7 +102,7 @@ int8_t Write_to_nRF(/*int8_t*/reg_map reg, int8_t *reg_value);
  * Return: a debug handle
  * Description: function to read the value stored in the register.
  */
-int8_t Read_from_nRF(reg_map reg, int8_t *reg_value);
+int8_t Read_from_nRF(reg_map reg, uint8_t *reg_value);
 
 void setup_begin_config(); 
 
@@ -108,8 +112,14 @@ int8_t Flush_RX(void);
 
 int8_t Flush_TX(void);
 
-int8_t Abs_Write_5B_to_nRF_Register(reg_map reg, uint8_t *value);
+uint8_t Abs_Write_5B_to_nRF_Register(reg_map reg, uint8_t *value);
+
+uint8_t Abs_Write_5B_to_nRF_Register_SPI1(reg_map reg, uint8_t *value);
 
 void loop();
+
+void reset_all_registers_SPI1(void);
+
+void reset_all_registers_SPI0(void);
 
 #endif /* INCLUDES_NRF_H_ */

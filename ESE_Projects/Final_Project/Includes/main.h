@@ -17,5 +17,6 @@
 #include "parse_data.h"
 #include "spi.h"
 #include "nRF.h"
+#include "eeprom.h"
 
 #endif /* INCLUDES_MAIN_H_ */

@@ -8,6 +8,126 @@
 #include "spi_masks.h"
 #include "spi.h"
 
+#define DEBUG
+
+#if 0
+void trial_radio_config(void)
+{
+    /* 1. Select RX by setting the PRIM_PX to high */
+    Abs_Write_to_nRF_Register(CONFIG, 0x01); //CRC:0 and PRIM_RX:1
+    
+    /* 2. Completely disable the AA feature */
+    Abs_Write_to_nRF_Register(EN_AA, 0x00);
+
+    /* 3. Setting the address width on RX_PW_P1(pipe 1) */
+    Abs_Write_to_nRF_Register(RX_PW_P1, 0x20);
+
+    /* 4. Set the freq. channel to rx over */
+    Abs_Write_to_nRF_Register(RF_CH, 0x4C);
+
+    /* 5. Select the data rate */
+    Abs_Write_to_nRF_Register(RF_SETUP, 0x26);
+}
+#endif
+
+void reset_all_registers_SPI1(void)
+{
+    Abs_Write_to_nRF_Register_SPI1(CONFIG, 0x80);
+    Abs_Write_to_nRF_Register_SPI1(EN_AA, 0x3F);
+    Abs_Write_to_nRF_Register_SPI1(EN_RXADDR, 0x03);
+    Abs_Write_to_nRF_Register_SPI1(SETUP_AW, 0x03);
+    Abs_Write_to_nRF_Register_SPI1(SETUP_RETR, 0x03);
+    Abs_Write_to_nRF_Register_SPI1(RF_CH, 0x02);
+    Abs_Write_to_nRF_Register_SPI1(RF_SETUP, 0x0E);
+    Abs_Write_to_nRF_Register_SPI1(STATUS, 0x0E);
+
+    uint8_t value[5] = {0xe7, 0xe7, 0xe7, 0xe7, 0xe7};
+    Abs_Write_5B_to_nRF_Register_SPI1(RX_ADDR_P0, &value[0]);
+
+    uint8_t value_1[5] = {0xc2, 0xc2, 0xc2, 0xc2, 0xc2};
+    Abs_Write_5B_to_nRF_Register_SPI1(RX_ADDR_P1, &value_1[0]);
+
+    uint8_t value_tx[5] = {0xe7, 0xe7, 0xe7, 0xe7, 0xe7};
+    Abs_Write_5B_to_nRF_Register_SPI1(TX_ADDR, &value_tx[0]);
+
+    Abs_Write_to_nRF_Register_SPI1(RX_PW_P0, 0x00);
+    Abs_Write_to_nRF_Register_SPI1(RX_PW_P1, 0x00);
+
+    /* Read all in order to validate */
+
+#ifdef DEBUG
+    uint8_t reg_value = 0;
+    uint8_t ret_value[5] = {0};
+
+    Read_from_nRF_Register_SPI1(CONFIG, &reg_value);
+    Read_from_nRF_Register_SPI1(EN_AA, &reg_value);
+    Read_from_nRF_Register_SPI1(EN_RXADDR, &reg_value);
+    Read_from_nRF_Register_SPI1(SETUP_AW, &reg_value);
+    Read_from_nRF_Register_SPI1(SETUP_RETR, &reg_value);
+    Read_from_nRF_Register_SPI1(RF_CH, &reg_value);
+    Read_from_nRF_Register_SPI1(RF_SETUP, &reg_value);
+    Read_from_nRF_Register_SPI1(STATUS, &reg_value);
+
+    Read_5_Bytes_SPI1(RX_ADDR_P0, &ret_value[0]);
+    Read_5_Bytes_SPI1(RX_ADDR_P1, &ret_value[0]);
+    Read_5_Bytes_SPI1(TX_ADDR, &ret_value[0]);
+
+    Read_from_nRF_Register_SPI1(RX_PW_P0, &reg_value);
+    Read_from_nRF_Register_SPI1(RX_PW_P1, &reg_value);
+#endif
+
+}
+
+
+void reset_all_registers_SPI0(void)
+{
+    Abs_Write_to_nRF_Register(CONFIG, 0x80);
+    Abs_Write_to_nRF_Register(EN_AA, 0x3F);
+    Abs_Write_to_nRF_Register(EN_RXADDR, 0x03);
+    Abs_Write_to_nRF_Register(SETUP_AW, 0x03);
+    Abs_Write_to_nRF_Register(SETUP_RETR, 0x03);
+    Abs_Write_to_nRF_Register(RF_CH, 0x02);
+    Abs_Write_to_nRF_Register(RF_SETUP, 0x0E);
+    Abs_Write_to_nRF_Register(STATUS, 0x0E);
+
+    uint8_t value[5] = {0xe7, 0xe7, 0xe7, 0xe7, 0xe7};
+    Abs_Write_5B_to_nRF_Register(RX_ADDR_P0, &value[0]);
+
+    uint8_t value_1[5] = {0xc2, 0xc2, 0xc2, 0xc2, 0xc2};
+    Abs_Write_5B_to_nRF_Register(RX_ADDR_P1, &value_1[0]);
+
+    uint8_t value_tx[5] = {0xe7, 0xe7, 0xe7, 0xe7, 0xe7};
+    Abs_Write_5B_to_nRF_Register(TX_ADDR, &value_tx[0]);
+
+    Abs_Write_to_nRF_Register(RX_PW_P0, 0x00);
+    Abs_Write_to_nRF_Register(RX_PW_P1, 0x00);
+
+    /* Read all in order to validate */
+
+#ifdef DEBUG
+    uint8_t reg_value = 0;
+    uint8_t ret_value[5] = {0};
+
+    Read_from_nRF_Register(CONFIG, &reg_value);
+    Read_from_nRF_Register(EN_AA, &reg_value);
+    Read_from_nRF_Register(EN_RXADDR, &reg_value);
+    Read_from_nRF_Register(SETUP_AW, &reg_value);
+    Read_from_nRF_Register(SETUP_RETR, &reg_value);
+    Read_from_nRF_Register(RF_CH, &reg_value);
+    Read_from_nRF_Register(RF_SETUP, &reg_value);
+    Read_from_nRF_Register(STATUS, &reg_value);
+
+    Read_5_Bytes(RX_ADDR_P0, &ret_value[0]);
+    Read_5_Bytes(RX_ADDR_P1, &ret_value[0]);
+    Read_5_Bytes(TX_ADDR, &ret_value[0]);
+
+    Read_from_nRF_Register(RX_PW_P0, &reg_value);
+    Read_from_nRF_Register(RX_PW_P1, &reg_value);
+#endif
+
+}
+
+
 int8_t Flush_TX(void)
 {
     Pull_CS_Low();
@@ -30,7 +150,7 @@ int8_t Flush_RX(void)
     Pull_CS_High();
 }
 
-int8_t Read_from_nRF(reg_map reg, int8_t *reg_value)
+int8_t Read_from_nRF(reg_map reg, uint8_t *reg_value)
 {
     uint8_t reg_addr = 0;
     int8_t ret_debug_handle;
@@ -55,6 +175,19 @@ uint8_t Send_Read_Write_Command(uint8_t *cmd)
 	return ret_value;
 }
 
+uint8_t Send_Read_Write_Command_SPI1(uint8_t *cmd)
+{
+    uint8_t ret_value = 0;
+
+    while(WAIT_FOR_SPTEF_SPI1);
+    SPI1->D = *cmd;
+    while(WAIT_FOR_SPRF_SPI1);
+    ret_value = SPI1->D;
+
+    return ret_value;
+}
+
+
 /* please don't use this func.! It is redundant! */
 
 uint8_t Send_Dummy_Byte(void)
@@ -70,6 +203,18 @@ uint8_t Send_Dummy_Byte(void)
 
 }
 
+uint8_t Send_Write_Value_SPI1(uint8_t write_value)
+{
+	uint8_t ret_value = 0;
+
+	while(WAIT_FOR_SPTEF_SPI1);
+	SPI1->D = write_value;
+	while(WAIT_FOR_SPRF_SPI1);
+	ret_value = SPI1->D;
+
+	return ret_value;
+}
+
 uint8_t Send_Write_Value(uint8_t write_value)
 {
 	uint8_t ret_value = 0;
@@ -82,7 +227,30 @@ uint8_t Send_Write_Value(uint8_t write_value)
 	return ret_value;
 }
 
-int8_t Abs_Write_5B_to_nRF_Register(reg_map reg, uint8_t *value)
+uint8_t Abs_Write_5B_to_nRF_Register_SPI1(reg_map reg, uint8_t *value)
+{
+    uint8_t *temp_value = value; 
+    uint8_t reg_addr = 0;
+    uint8_t len = 5;
+
+    reg_addr = W_REGISTER | reg;
+
+    Pull_CS_Low_SPI1();
+    Send_Read_Write_Command_SPI1(&reg_addr);
+
+    delay(10);
+
+    while(len) {
+        Send_Write_Value_SPI1(*(temp_value++));
+        len--;
+    }
+    Pull_CS_High_SPI1();
+
+    return 0;
+
+}
+
+uint8_t Abs_Write_5B_to_nRF_Register(reg_map reg, uint8_t *value)
 {
     uint8_t *temp_value = value; 
     uint8_t reg_addr = 0;
@@ -232,9 +400,10 @@ int8_t data_available(void)
 
     if(rx_in) {
         MY_LOG("We're IN!!\n");
+        return 1;
     }
 
-    return 1;
+    return 0;
 }
 
 

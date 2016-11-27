@@ -30,14 +30,37 @@
 
 #include "main.h"
 
-#define SPI_Read_Write_Working
+//#define SPI_Read_Write_Working
 #define DEBUG
-//#define SPI0_Rx_nRF_Comm
+#define SPI0_Rx_nRF_Comm
 
 int main(void)
 {
 
 #ifdef SPI0_Rx_nRF_Comm
+
+/* TODO - List 
+ * 2. After that see that you can write the lib. for the nRF on using that.
+ * 3. end of it, have to interface the CAT EEPROM module to get that to work.
+ */
+
+    /* Put all the Values back to what they should be! */
+
+    uint8_t ret_value = 0;
+
+    spi_0_init();
+    spi_1_init();
+
+    reset_all_registers_SPI1();
+    reset_all_registers_SPI0();
+
+    /* This function need to be re-prog'd and 
+     * made a prt of the init. function */
+    //config_spi0_CE();
+
+    //reset_all_registers();
+
+
 
 #if 0
     /* XXX: Leaving this snippet here for Ref.! */
@@ -98,7 +121,7 @@ int main(void)
 	/*Change config to write*/
 	reg_addr = R_REGISTER | CONFIG;
 
-	ret_debug_handle = Read_Single_Byte(&reg_addr, &return_val);
+	ret_debug_handle = Read_from_nRF_Register(&reg_addr, &return_val);
 	out = return_val;
 	MY_LOG_PARAMS("Read Operation Output(post write): ", out);
 	MY_LOG("\n");
