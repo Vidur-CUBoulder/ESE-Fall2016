@@ -18,5 +18,7 @@
 #include "spi.h"
 #include "nRF.h"
 #include "eeprom.h"
+#include "temperature_sensor.h"
+
 
 #endif /* INCLUDES_MAIN_H_ */

@@ -32,10 +32,25 @@
 
 //#define SPI_Read_Write_Working
 #define DEBUG
+#define temp_sensor
 //#define SPI0_Rx_nRF_Comm
 
 int main(void)
 {
+
+#ifdef temp_sensor
+
+    Init_Temp_Sensor();
+
+    int16_t result = 0;
+    
+    Read_Temp_Sensor_Value(&result);
+
+    MY_LOG_PARAMS("OUTPUT: ", result);
+
+    /* Remaining, code for the temp. value calculation */
+
+#endif
 
 #ifdef SPI0_Rx_nRF_Comm
 
