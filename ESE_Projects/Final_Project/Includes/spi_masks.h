@@ -10,6 +10,13 @@
 
 #include "MKL25Z4.h"
 
+#define CE_SPI0_High() 0x00000008 
+#define CE_SPI1_High() 0x00000008 
+
+
+#define CE_SPI0_Low() 0x00000008
+#define CE_SPI1_Low() 0x00000008
+
 #define WAIT_FOR_SPTEF ( !(SPI_S_REG(SPI0) & SPI_S_SPTEF_MASK))
 #define WAIT_FOR_SPTEF_SPI1 ( !(SPI_S_REG(SPI1) & SPI_S_SPTEF_MASK))
 
@@ -75,7 +82,7 @@
 #define R_REGISTER              0x00 	/* 000A_AAAA; A->Address */
 #define W_REGISTER              0x20 	/* 001A_AAAA */
 #define R_RX_PAYLOAD            0x61 	/* 0110_0001 - Fixed */
-#define W_TXAYLOAD              0XA0 	/* 1010_0000 - Fixed */
+#define W_TX_PAYLOAD            0XA0 	/* 1010_0000 - Fixed */
 #define FLUSH_TX                0xE1 	/* 1110_0001 - Fixed */
 #define FLUSH_RX                0xE2 	/* 1110_0010 - Fixed */
 #define REUSE_TX_PL             0xE3	/* 1110_0011 - Fixed */

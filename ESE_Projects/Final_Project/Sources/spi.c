@@ -159,8 +159,6 @@ errors Read_5_Bytes(reg_map reg, uint8_t *ret_value)
 	}
 
 	uint8_t cntr = 0;
-        uint8_t i = 0;
-        uint8_t temp_val = 0;
 
         uint8_t cmd = R_REGISTER | reg;
         
@@ -185,11 +183,20 @@ errors Read_5_Bytes(reg_map reg, uint8_t *ret_value)
 errors Read_5_Bytes_SPI1(reg_map reg, uint8_t *ret_value)
 {
 	uint8_t cntr = 0;
-        //uint8_t cmd = R_REGISTER | reg;
+        uint8_t cmd = R_REGISTER | reg;
 
+        Pull_CS_Low_SPI1();
+        Send_Read_Write_Command_SPI1(&cmd);
+
+        delay(10);
+
+        cmd = NOP;
 	for(cntr = 0; cntr < MAX_REG_LENGTH; cntr++) {
-		*(ret_value+cntr) = Read_from_nRF_Register_SPI1(reg, ret_value);
+		//*(ret_value+cntr) = Read_from_nRF_Register_SPI1(reg, ret_value);
+		*(ret_value+cntr) = Send_Read_Write_Command_SPI1(&cmd);
 	}
+
+        Pull_CS_High_SPI1();
 
 	if(ret_value != NULL) {
 		return nRF_READ_SUCCESSFUL;
@@ -313,3 +320,34 @@ uint8_t Write_to_nRF_Register(reg_map reg, uint8_t write_value)
 	return return_nRF_value;
 
 }
+
+uint8_t Write_to_nRF_Register_SPI1(reg_map reg, uint8_t write_value)
+{
+        /* First read the present value in the register
+         * and then OR it with the new value. This is the proper
+         * way of writing to registers.
+         */
+        
+	uint8_t return_nRF_value = 0;
+        uint8_t read_reg_value = 0;
+        uint8_t final_write_value = 0;
+        uint8_t reg_addr = 0;
+    
+        read_reg_value = Read_from_nRF_Register_SPI1(reg, &read_reg_value);
+        
+        reg_addr = W_REGISTER | reg;
+        final_write_value = write_value | read_reg_value; 
+        
+	Pull_CS_Low_SPI1();
+	Send_Read_Write_Command_SPI1(&reg_addr);
+
+	delay(10);
+
+	return_nRF_value = Send_Write_Value_SPI1(final_write_value);
+	Pull_CS_High_SPI1();
+
+	return return_nRF_value;
+}
+
+
+

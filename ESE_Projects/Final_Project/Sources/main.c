@@ -32,17 +32,12 @@
 
 //#define SPI_Read_Write_Working
 #define DEBUG
-#define SPI0_Rx_nRF_Comm
+//#define SPI0_Rx_nRF_Comm
 
 int main(void)
 {
 
 #ifdef SPI0_Rx_nRF_Comm
-
-/* TODO - List 
- * 2. After that see that you can write the lib. for the nRF on using that.
- * 3. end of it, have to interface the CAT EEPROM module to get that to work.
- */
 
     /* Put all the Values back to what they should be! */
 
@@ -54,11 +49,19 @@ int main(void)
     reset_all_registers_SPI1();
     reset_all_registers_SPI0();
 
-    /* This function need to be re-prog'd and 
-     * made a prt of the init. function */
-    //config_spi0_CE();
+    Setup_PTX_Device();
+    Setup_PRX_Device();
+    
+    delay(80);
+    
+    CE_SPI0_Low();
+    CE_SPI1_Low();
 
-    //reset_all_registers();
+    Abs_Write_to_nRF_Register(CONFIG, 0x00);
+    Abs_Write_to_nRF_Register_SPI1(CONFIG, 0x01);
+    
+    Dump_SPI0_Reg();
+    Dump_SPI1_Reg();
 
 
 

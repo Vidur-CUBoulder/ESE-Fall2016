@@ -109,6 +109,7 @@ void setup_begin_config();
 void setup_nRF_radio();
 
 int8_t Flush_RX(void);
+void Flush_RX_SPI1(void);
 
 int8_t Flush_TX(void);
 
@@ -121,5 +122,12 @@ void loop();
 void reset_all_registers_SPI1(void);
 
 void reset_all_registers_SPI0(void);
+
+void Setup_PTX_Device();
+
+void Setup_PRX_Device();
+
+void Dump_SPI1_Reg(void);
+void Dump_SPI0_Reg(void);
 
 #endif /* INCLUDES_NRF_H_ */

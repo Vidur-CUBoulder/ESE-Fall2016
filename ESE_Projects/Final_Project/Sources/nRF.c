@@ -8,7 +8,6 @@
 #include "spi_masks.h"
 #include "spi.h"
 
-#define DEBUG
 
 #if 0
 void trial_radio_config(void)
@@ -54,11 +53,17 @@ void reset_all_registers_SPI1(void)
     Abs_Write_to_nRF_Register_SPI1(RX_PW_P1, 0x00);
 
     /* Read all in order to validate */
+    //Dump_SPI1_Reg();
+}
 
-#ifdef DEBUG
+void Dump_SPI1_Reg(void)
+{
     uint8_t reg_value = 0;
     uint8_t ret_value[5] = {0};
 
+    Read_from_nRF_Register_SPI1(STATUS, &reg_value);
+    Read_from_nRF_Register_SPI1(OBSERVE_TX, &reg_value);
+    Read_from_nRF_Register_SPI1(FIFO_STATUS, &reg_value);
     Read_from_nRF_Register_SPI1(CONFIG, &reg_value);
     Read_from_nRF_Register_SPI1(EN_AA, &reg_value);
     Read_from_nRF_Register_SPI1(EN_RXADDR, &reg_value);
@@ -66,7 +71,6 @@ void reset_all_registers_SPI1(void)
     Read_from_nRF_Register_SPI1(SETUP_RETR, &reg_value);
     Read_from_nRF_Register_SPI1(RF_CH, &reg_value);
     Read_from_nRF_Register_SPI1(RF_SETUP, &reg_value);
-    Read_from_nRF_Register_SPI1(STATUS, &reg_value);
 
     Read_5_Bytes_SPI1(RX_ADDR_P0, &ret_value[0]);
     Read_5_Bytes_SPI1(RX_ADDR_P1, &ret_value[0]);
@@ -74,8 +78,6 @@ void reset_all_registers_SPI1(void)
 
     Read_from_nRF_Register_SPI1(RX_PW_P0, &reg_value);
     Read_from_nRF_Register_SPI1(RX_PW_P1, &reg_value);
-#endif
-
 }
 
 
@@ -103,11 +105,18 @@ void reset_all_registers_SPI0(void)
     Abs_Write_to_nRF_Register(RX_PW_P1, 0x00);
 
     /* Read all in order to validate */
+    //Dump_SPI0_Reg();
 
-#ifdef DEBUG
+}
+
+void Dump_SPI0_Reg(void)
+{
     uint8_t reg_value = 0;
     uint8_t ret_value[5] = {0};
 
+    Read_from_nRF_Register(STATUS, &reg_value);
+    Read_from_nRF_Register(OBSERVE_TX, &reg_value);
+    Read_from_nRF_Register(FIFO_STATUS, &reg_value);
     Read_from_nRF_Register(CONFIG, &reg_value);
     Read_from_nRF_Register(EN_AA, &reg_value);
     Read_from_nRF_Register(EN_RXADDR, &reg_value);
@@ -115,7 +124,6 @@ void reset_all_registers_SPI0(void)
     Read_from_nRF_Register(SETUP_RETR, &reg_value);
     Read_from_nRF_Register(RF_CH, &reg_value);
     Read_from_nRF_Register(RF_SETUP, &reg_value);
-    Read_from_nRF_Register(STATUS, &reg_value);
 
     Read_5_Bytes(RX_ADDR_P0, &ret_value[0]);
     Read_5_Bytes(RX_ADDR_P1, &ret_value[0]);
@@ -123,8 +131,6 @@ void reset_all_registers_SPI0(void)
 
     Read_from_nRF_Register(RX_PW_P0, &reg_value);
     Read_from_nRF_Register(RX_PW_P1, &reg_value);
-#endif
-
 }
 
 
@@ -134,6 +140,17 @@ int8_t Flush_TX(void)
    
     uint8_t cmd = FLUSH_TX;
     Send_Read_Write_Command(&cmd);
+    delay(10);
+    
+    Pull_CS_High();
+}
+
+void Flush_RX_SPI1(void)
+{
+    Pull_CS_Low();
+    
+    uint8_t cmd = FLUSH_RX;
+    Send_Read_Write_Command_SPI1(&cmd);
     delay(10);
     
     Pull_CS_High();
@@ -272,6 +289,125 @@ uint8_t Abs_Write_5B_to_nRF_Register(reg_map reg, uint8_t *value)
     return 0;
 
 }
+
+/* Setup the PTX device 
+ *       << SPI0>>
+ */
+void Setup_PTX_Device()
+{
+    uint8_t read_value = 0;
+    uint8_t len = 5;
+
+    Flush_TX(); //remove all data from the TX FIFO
+    Abs_Write_to_nRF_Register(STATUS, 0x00);
+    
+    /* 0. Set the data rate at 1Mbps */
+    Abs_Write_to_nRF_Register(RF_SETUP, 0x0E);
+    Read_from_nRF_Register(RF_SETUP, &read_value);
+    
+    /* 1. Set the CONFIG bit PRIM_RX low */
+    Abs_Write_to_nRF_Register(CONFIG, 0x00);
+    Read_from_nRF_Register(CONFIG, &read_value);
+    
+    //config data pipe 0 to rx ACK!
+    Abs_Write_to_nRF_Register(EN_AA, 0x00); 
+    Read_from_nRF_Register(CONFIG, &read_value);
+    
+    /* 2. Write to the TX_PLD using the W_TX_PAYLOAD command. 
+     * Note that the CSN must be held low while writing data into the TX Buf.
+     */
+    Pull_CS_Low();
+    
+    uint8_t cmd = W_TX_PAYLOAD;
+    Send_Read_Write_Command(&cmd);
+    
+    delay(10);
+
+    //Now start pushing the data into the payload buffer!
+    while(len) {
+        Send_Write_Value(0xA0);
+        len--;
+    }
+    
+    Pull_CS_High();
+
+    // Read the FIFO_STATUS reg. for testing
+    Read_from_nRF_Register(FIFO_STATUS, &read_value);
+
+    /* 3. Write the addresses 
+     * TX_ADDR:         0xB3B4B5B6f1
+     * RX_ADDR_P0:      0xB3B4B5B6f1
+     */
+   
+    uint8_t ret_value[5] = {0};
+    uint8_t rx_addr_val[] = { 0xb3, 0xb4, 0xb5, 0xb6, 0xf1 };
+    Abs_Write_5B_to_nRF_Register(TX_ADDR, &rx_addr_val[0]);
+    Read_5_Bytes(TX_ADDR, &ret_value[0]);
+    
+    Abs_Write_5B_to_nRF_Register(RX_ADDR_P0, &rx_addr_val[0]);
+    Read_5_Bytes(RX_ADDR_P0, &ret_value[0]);
+    
+    //Just for fun.. count the number of lost packets
+    Read_from_nRF_Register(OBSERVE_TX, &read_value);
+
+    //Power up the module!
+    Write_to_nRF_Register(CONFIG, 0x02);
+    Read_from_nRF_Register(CONFIG, &read_value);
+
+    //Lastly, raise the CE pin!
+    CE_SPI0_High(); 
+
+    delay(10);
+}
+
+/* Setup the PRX Device
+ *  <<**** SPI1 ****>>
+ */
+
+void Setup_PRX_Device(void)
+{
+    uint8_t reg_value = 0;
+    Abs_Write_to_nRF_Register(STATUS, 0x00);
+    
+    //0. Flush the RX Buffer!
+    Flush_RX_SPI1();
+    Read_from_nRF_Register_SPI1(CONFIG, &reg_value);
+
+    //1. Set the PRIM_RX bit in the CONFIG reg.
+    Abs_Write_to_nRF_Register_SPI1(CONFIG, 0x01);
+    Read_from_nRF_Register_SPI1(CONFIG, &reg_value);
+    
+    //All data pipes that receive data should be enabled.
+    //Enabling data pipes 0 and 1
+    Abs_Write_to_nRF_Register_SPI1(EN_RXADDR, 0x03);
+    Read_from_nRF_Register_SPI1(EN_RXADDR, &reg_value);
+
+    //Also enable the AA on pipe0
+    Abs_Write_to_nRF_Register_SPI1(EN_AA, 0x00);
+    Read_from_nRF_Register_SPI1(EN_AA, &reg_value);
+   
+    //Write to the RX_ADDR_P5..
+    uint8_t ret_value[5] = {0};
+    uint8_t value_1[5] = {0xb3, 0xb4, 0xb5, 0xb6, 0xf1};
+    Abs_Write_5B_to_nRF_Register_SPI1(RX_ADDR_P1, &value_1[0]);
+    Read_5_Bytes_SPI1(RX_ADDR_P1, &ret_value[0]);
+   
+    //Power up the module!
+    Write_to_nRF_Register_SPI1(CONFIG, 0x02);
+    Read_from_nRF_Register_SPI1(CONFIG, &reg_value);
+
+    //Now, raise the CE pin for SPI1
+    CE_SPI1_High();
+
+    delay(10);
+}
+
+
+
+
+
+
+
 void setup_nRF_radio(void)
 {
     /* This is bogus. Please remove post testing */

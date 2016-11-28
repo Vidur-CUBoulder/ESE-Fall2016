@@ -47,6 +47,7 @@ uint8_t Read_from_nRF_Register_SPI1(reg_map reg, uint8_t *reg_value);
  * should be used to write to a particular register in the nRF module.
  */
 uint8_t Write_to_nRF_Register(reg_map reg, uint8_t write_value);
+uint8_t Write_to_nRF_Register_SPI1(reg_map reg, uint8_t write_value);
 
 /* Function: Abs_Write_to_nRF_Register(reg_map reg, uint8_t write_value);
  * Parameters: 
