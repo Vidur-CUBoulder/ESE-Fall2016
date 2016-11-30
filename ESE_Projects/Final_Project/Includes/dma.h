@@ -33,8 +33,6 @@
 
 uint8_t my_memmove_dma(uint8_t *src, uint8_t *dst, uint32_t length);
 
-uint8_t my_memmove_dma_64(uint8_t *src, uint8_t *dst, uint32_t length);
-
 uint8_t my_memzero_dma(uint8_t *src, uint32_t length);
 
 uint8_t config_one_byte_length(uint32_t length);
