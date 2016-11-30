@@ -35,11 +35,13 @@ void spi_1_init(void)
 
 	/* Config the Baud Rate for SPI1 comm. */
 	SPI_BR_REG(SPI1) = SPI1_BAUD_RATE;
+	//SPI_BR_REG(SPI1) = 0x00;
 
 	/*Config the C1 SPI1 register as master connection */
 	SPI1->C1 = SPI1_C1_CONFIG;
 
-        /* Do a trial with clock polarity and clock phase! */
+        /* Pull the CS High Now! */
+        Pull_CS_High_SPI1();
 }
 
 /* Config. as master */
@@ -213,7 +215,7 @@ uint8_t Read_from_nRF_Register_SPI1(reg_map reg, uint8_t *reg_value)
     uint8_t reg_addr = R_REGISTER | reg;
 
 	Pull_CS_Low_SPI1();
-	
+
 	uint8_t ret_value = 0;
 
 	while(!(SPI_S_REG(SPI1) & SPI_S_SPTEF_MASK));
@@ -242,7 +244,7 @@ uint8_t Read_from_nRF_Register(reg_map reg, uint8_t *ret_value)
 	uint8_t reg_addr = R_REGISTER | reg;
 	
         Pull_CS_Low();
-	Send_Read_Write_Command(&reg_addr);
+        Send_Read_Write_Command(&reg_addr);
 
 	delay(10);
 

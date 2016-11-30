@@ -10,12 +10,12 @@
 
 #include "MKL25Z4.h"
 
-#define CE_SPI0_High() 0x00000008 
-#define CE_SPI1_High() 0x00000008 
+#define CE_SPI0_High() (GPIOC_PSOR |= 0x00000008) 
+#define CE_SPI1_High() (GPIOD_PSOR |= 0x00000008) 
 
 
-#define CE_SPI0_Low() 0x00000008
-#define CE_SPI1_Low() 0x00000008
+#define CE_SPI0_Low() (GPIOC_PCOR |= 0x00000008)
+#define CE_SPI1_Low() (GPIOD_PCOR |= 0x00000008)
 
 #define WAIT_FOR_SPTEF ( !(SPI_S_REG(SPI0) & SPI_S_SPTEF_MASK))
 #define WAIT_FOR_SPTEF_SPI1 ( !(SPI_S_REG(SPI1) & SPI_S_SPTEF_MASK))
@@ -23,21 +23,21 @@
 #define WAIT_FOR_SPRF ( !(SPI_S_REG(SPI0) & SPI_S_SPRF_MASK))
 #define WAIT_FOR_SPRF_SPI1 ( !(SPI_S_REG(SPI1) & SPI_S_SPRF_MASK))
 
-/*Function: Pull_CS_Low()
+/*Function: Pull_CS_Low() & Pull_CS_Low_SPI1()
  * Parameters: void
  * Description: Pull the CS line low and start the SPI transmission.
  */
-#define Pull_CS_Low() GPIOC_PCOR = 0x00000010
+#define Pull_CS_Low() (GPIOC_PCOR = 0x00000010)
 
-#define Pull_CS_Low_SPI1() GPIOD_PCOR = 0x00000010
+#define Pull_CS_Low_SPI1() (GPIOD_PCOR = 0x00000010)
 
-/*Function: Pull_CS_High()
+/*Function: Pull_CS_High() & Pull_CS_High_SPI1()
  * Parameters: void
  * Description: Pull the CS line high and stop the SPI transmission.
  */
-#define Pull_CS_High() GPIOC_PSOR = 0x00000010
+#define Pull_CS_High() (GPIOC_PSOR = 0x00000010)
 
-#define Pull_CS_High_SPI1() GPIOD_PSOR = 0x00000010
+#define Pull_CS_High_SPI1() (GPIOD_PSOR = 0x00000010)
 
 /* SPI1 Initialization Macrons */
 
@@ -115,7 +115,7 @@ typedef enum register_defs_t {
     TX_ADDR        = 0x10,
     RX_PW_P0       = 0x11,
     RX_PW_P1       = 0x12,
-    PX_PW_P2       = 0x13,
+    RX_PW_P2       = 0x13,
     RX_PW_P3       = 0x14,
     RX_PW_P4       = 0x15,
     RX_PW_P5       = 0x16,

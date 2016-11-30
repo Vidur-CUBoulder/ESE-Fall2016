@@ -130,4 +130,12 @@ void Setup_PRX_Device();
 void Dump_SPI1_Reg(void);
 void Dump_SPI0_Reg(void);
 
+
+void setup_common_nRF_char(void);
+
+void set_device_addr(void);
+
+void Setup_TX(void);
+
+
 #endif /* INCLUDES_NRF_H_ */

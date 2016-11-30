@@ -31,12 +31,26 @@
 #include "main.h"
 
 //#define SPI_Read_Write_Working
-#define DEBUG
-#define temp_sensor
+//#define DEBUG
+//#define temp_sensor
 //#define SPI0_Rx_nRF_Comm
 
 int main(void)
 {
+    uint8_t out = 0;
+
+    spi_1_init();
+
+    uint8_t read_status_value = 0;
+    Read_Status(&read_status_value);
+
+    Enable_Write_Latch();
+    Disable_Write_Latch();
+
+    uint8_t address = 0x00;
+
+    Write_Data_to_EEPROM(10, &address);
+    Read_Data_from_EEPROM(&address);
 
 #ifdef temp_sensor
 
@@ -56,29 +70,28 @@ int main(void)
 
     /* Put all the Values back to what they should be! */
 
-    uint8_t ret_value = 0;
+    uint8_t reg_value = 0;
 
     spi_0_init();
     spi_1_init();
 
     reset_all_registers_SPI1();
     reset_all_registers_SPI0();
-
-    Setup_PTX_Device();
-    Setup_PRX_Device();
     
+    //Setup_PTX_Device();
+    //Setup_PRX_Device();
+   
+    setup_common_nRF_char();
+    set_device_addr();
+    Setup_TX();
+
     delay(80);
     
     CE_SPI0_Low();
     CE_SPI1_Low();
 
-    Abs_Write_to_nRF_Register(CONFIG, 0x00);
-    Abs_Write_to_nRF_Register_SPI1(CONFIG, 0x01);
-    
     Dump_SPI0_Reg();
     Dump_SPI1_Reg();
-
-
 
 #if 0
     /* XXX: Leaving this snippet here for Ref.! */
@@ -189,16 +202,16 @@ int main(void)
 
 #ifdef ENABLE_DMA
 	
-	uint8_t src[11] = {0};
-	uint8_t dst[11] = {0};
+	uint8_t src[8] = {0};
+	uint8_t dst[8] = {0};
 
 	uint8_t i = 0;
-	for (i = 0; i<11; i++) {
+	for (i = 0; i<8; i++) {
 		src[i] = 0x05;
 		dst[i] = 0x03;
 	}
 
-	uint32_t len = 11;
+	uint32_t len = 8;
 
 #ifdef DEBUG
 	/*Optional UART config. To get debugging info.*/
@@ -211,7 +224,7 @@ int main(void)
 	debug dma_ret_handle;
 
 	/*Initialize the counter*/
-	dma_ret_handle = my_memmove_dma( src, dst, len);
+	dma_ret_handle = my_memmove_dma_64( src, dst, len);
 	#ifdef DEBUG
 		handle_errors(dma_ret_handle);
 	#endif

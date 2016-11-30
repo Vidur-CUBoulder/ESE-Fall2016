@@ -71,6 +71,7 @@ void Dump_SPI1_Reg(void)
     Read_from_nRF_Register_SPI1(SETUP_RETR, &reg_value);
     Read_from_nRF_Register_SPI1(RF_CH, &reg_value);
     Read_from_nRF_Register_SPI1(RF_SETUP, &reg_value);
+    Read_from_nRF_Register_SPI1(DYNPD, &reg_value);
 
     Read_5_Bytes_SPI1(RX_ADDR_P0, &ret_value[0]);
     Read_5_Bytes_SPI1(RX_ADDR_P1, &ret_value[0]);
@@ -78,6 +79,10 @@ void Dump_SPI1_Reg(void)
 
     Read_from_nRF_Register_SPI1(RX_PW_P0, &reg_value);
     Read_from_nRF_Register_SPI1(RX_PW_P1, &reg_value);
+    Read_from_nRF_Register_SPI1(RX_PW_P2, &reg_value);
+    Read_from_nRF_Register_SPI1(RX_PW_P3, &reg_value);
+    Read_from_nRF_Register_SPI1(RX_PW_P4, &reg_value);
+    Read_from_nRF_Register_SPI1(RX_PW_P5, &reg_value);
 }
 
 
@@ -124,6 +129,7 @@ void Dump_SPI0_Reg(void)
     Read_from_nRF_Register(SETUP_RETR, &reg_value);
     Read_from_nRF_Register(RF_CH, &reg_value);
     Read_from_nRF_Register(RF_SETUP, &reg_value);
+    Read_from_nRF_Register(DYNPD, &reg_value);
 
     Read_5_Bytes(RX_ADDR_P0, &ret_value[0]);
     Read_5_Bytes(RX_ADDR_P1, &ret_value[0]);
@@ -131,6 +137,10 @@ void Dump_SPI0_Reg(void)
 
     Read_from_nRF_Register(RX_PW_P0, &reg_value);
     Read_from_nRF_Register(RX_PW_P1, &reg_value);
+    Read_from_nRF_Register(RX_PW_P2, &reg_value);
+    Read_from_nRF_Register(RX_PW_P3, &reg_value);
+    Read_from_nRF_Register(RX_PW_P4, &reg_value);
+    Read_from_nRF_Register(RX_PW_P5, &reg_value);
 }
 
 
@@ -147,13 +157,13 @@ int8_t Flush_TX(void)
 
 void Flush_RX_SPI1(void)
 {
-    Pull_CS_Low();
+    Pull_CS_Low_SPI1();
     
     uint8_t cmd = FLUSH_RX;
     Send_Read_Write_Command_SPI1(&cmd);
     delay(10);
     
-    Pull_CS_High();
+    Pull_CS_High_SPI1();
 }
 
 int8_t Flush_RX(void)
@@ -290,6 +300,175 @@ uint8_t Abs_Write_5B_to_nRF_Register(reg_map reg, uint8_t *value)
 
 }
 
+/* Setup Common nRF Characteristics */
+void setup_common_nRF_char(void)
+{
+    /* Channel: 2
+     * Payload: 4
+     */
+
+	uint8_t reg_value = 0;
+
+    /*1. Setup the RF channel */
+    Abs_Write_to_nRF_Register(RF_CH, 76);
+    Abs_Write_to_nRF_Register_SPI1(RF_CH, 76);
+    Read_from_nRF_Register(RF_CH, &reg_value);
+
+    /*2. Config the payload length on p1 */
+    Abs_Write_to_nRF_Register(RX_PW_P1, 4);
+    Abs_Write_to_nRF_Register_SPI1(RX_PW_P1, 4);
+    Read_from_nRF_Register(RX_PW_P1, &reg_value);
+    Read_from_nRF_Register_SPI1(RX_PW_P1, &reg_value);
+
+    //Make sure that everything else is 0.
+    Read_from_nRF_Register(RX_PW_P0, &reg_value);
+    Read_from_nRF_Register_SPI1(RX_PW_P0, &reg_value);
+    
+    Read_from_nRF_Register(RX_PW_P2, &reg_value);
+    Read_from_nRF_Register_SPI1(RX_PW_P2, &reg_value);
+    
+    Read_from_nRF_Register(RX_PW_P3, &reg_value);
+    Read_from_nRF_Register_SPI1(RX_PW_P3, &reg_value);
+    
+    Read_from_nRF_Register(RX_PW_P4, &reg_value);
+    Read_from_nRF_Register_SPI1(RX_PW_P4, &reg_value);
+    
+    Read_from_nRF_Register(RX_PW_P5, &reg_value);
+    Read_from_nRF_Register_SPI1(RX_PW_P5, &reg_value);
+
+    /* 3. 1Mbps and TX Gain: 0db */
+    //Abs_Write_to_nRF_Register(RF_SETUP, 0x06);
+    Abs_Write_to_nRF_Register(RF_SETUP, 0x26);
+    //Abs_Write_to_nRF_Register_SPI1(RF_SETUP, 0x06);
+    Read_from_nRF_Register(RF_SETUP, &reg_value);
+    //Read_from_nRF_Register_SPI1(RF_SETUP, &reg_value);
+   
+    /* 4. Enable CRC, 1B */
+    /*Abs_Write_to_nRF_Register(CONFIG, 0x08);
+    Abs_Write_to_nRF_Register_SPI1(CONFIG, 0x08);
+    Read_from_nRF_Register(CONFIG, &reg_value);
+    Read_from_nRF_Register_SPI1(CONFIG, &reg_value);*/
+
+    /* 5. EN_AA on pipes 0 & 1 */
+    Abs_Write_to_nRF_Register(EN_AA, 0x00);
+    Abs_Write_to_nRF_Register_SPI1(EN_AA, 0x00);
+    Read_from_nRF_Register(EN_AA, &reg_value);
+    Read_from_nRF_Register_SPI1(EN_AA, &reg_value);
+    
+
+    /* 6. Enable the RX_ADDR for pipes 0 & 1 */ 
+    //Abs_Write_to_nRF_Register(EN_RXADDR, 0x03);
+    Abs_Write_to_nRF_Register_SPI1(EN_RXADDR, 0x03);
+    //Read_from_nRF_Register(EN_RXADDR, &reg_value);
+    Read_from_nRF_Register_SPI1(EN_RXADDR, &reg_value);
+
+    /* 7. 1000us and 15 retransmits */
+    Abs_Write_to_nRF_Register(SETUP_RETR, 0x02);
+    //Abs_Write_to_nRF_Register_SPI1(SETUP_RETR, 0x02);
+    Read_from_nRF_Register(SETUP_RETR, &reg_value);
+    //Read_from_nRF_Register_SPI1(SETUP_RETR, &reg_value);
+
+    /* 8. Make sure that DYNPD is 0 */
+    Abs_Write_to_nRF_Register(DYNPD, 0x00);
+    Abs_Write_to_nRF_Register_SPI1(DYNPD, 0x00);
+    Read_from_nRF_Register(DYNPD, &reg_value);
+    Read_from_nRF_Register_SPI1(DYNPD, &reg_value);
+
+    //------- Enable the RX module ------------
+
+    /* 9. Flush the RX Register */
+    Flush_RX_SPI1();
+
+    /* 10. Write to the STATUS register */
+    Write_to_nRF_Register(STATUS, 0x70);
+    Write_to_nRF_Register_SPI1(STATUS, 0x70);
+    Read_from_nRF_Register(STATUS, &reg_value);
+    Read_from_nRF_Register_SPI1(STATUS, &reg_value);
+
+    /* 11. Power up the RX transeiver */
+    CE_SPI1_Low();
+
+    Write_to_nRF_Register_SPI1(CONFIG, 0x03); 
+    Read_from_nRF_Register_SPI1(CONFIG, &reg_value);
+
+    CE_SPI1_High();
+
+}
+
+void set_device_addr(void)
+{
+    // For PTX -- SPI0
+    uint8_t ret_value[5] = {0};
+    uint8_t rx_addr_val[] = { 0xe7, 0xe7, 0xe7, 0xe7, 0xe7 };
+
+    Abs_Write_5B_to_nRF_Register(RX_ADDR_P0, &rx_addr_val[0]);
+    Read_5_Bytes(RX_ADDR_P0, &ret_value[0]);
+    
+    Abs_Write_5B_to_nRF_Register(TX_ADDR, &rx_addr_val[0]);
+    Read_5_Bytes(TX_ADDR, &ret_value[0]);
+
+
+    // For PRX -- SPI1
+    CE_SPI1_Low();
+    
+    uint8_t value_1[5] = {0xe7, 0xe7, 0xe7, 0xe7, 0xe7};
+    Abs_Write_5B_to_nRF_Register_SPI1(RX_ADDR_P1, &value_1[0]);
+    Read_5_Bytes_SPI1(RX_ADDR_P1, &ret_value[0]);
+    
+    CE_SPI1_High();
+
+}
+
+void Setup_TX(void)
+{
+    uint8_t data_array[4] = {0x00, 0xAA, 0x55, 0x01}; 
+    uint8_t reg_value = 0;
+
+    CE_SPI1_Low();
+    CE_SPI0_Low();
+
+    //Setup TX module -- SPI0
+    
+    Abs_Write_to_nRF_Register(STATUS, 0x70);
+    Read_from_nRF_Register(STATUS, &reg_value);
+
+    /* Power up the PTX module */
+    Write_to_nRF_Register(CONFIG, 0x02);
+    Read_from_nRF_Register(CONFIG, &reg_value);
+
+    Flush_TX();
+
+    //Write to the TX payload!
+     
+    Pull_CS_Low();
+    
+    uint8_t cmd = W_TX_PAYLOAD;
+    Send_Read_Write_Command(&cmd);
+    
+    delay(10);
+
+    //Now start pushing the data into the payload buffer!
+    uint8_t i = 0;
+    uint8_t len = 4;
+    while(len) {
+        Send_Write_Value(data_array[i]);
+        i++;
+        len--;
+    }
+    
+    Pull_CS_High();
+
+    CE_SPI1_High();
+    delay(20);
+    CE_SPI0_High();
+    delay(20);
+    
+    delay(200);
+
+}
+
+#if 0
+
 /* Setup the PTX device 
  *       << SPI0>>
  */
@@ -302,7 +481,8 @@ void Setup_PTX_Device()
     Abs_Write_to_nRF_Register(STATUS, 0x00);
     
     /* 0. Set the data rate at 1Mbps */
-    Abs_Write_to_nRF_Register(RF_SETUP, 0x0E);
+    //Abs_Write_to_nRF_Register(RF_SETUP, 0x0E);
+    Abs_Write_to_nRF_Register(RF_SETUP, 0x0F);
     Read_from_nRF_Register(RF_SETUP, &read_value);
     
     /* 1. Set the CONFIG bit PRIM_RX low */
@@ -341,6 +521,7 @@ void Setup_PTX_Device()
    
     uint8_t ret_value[5] = {0};
     uint8_t rx_addr_val[] = { 0xb3, 0xb4, 0xb5, 0xb6, 0xf1 };
+    //uint8_t rx_addr_val[] = { 0xe7, 0xe7, 0xe7, 0xe7, 0xe7 };
     Abs_Write_5B_to_nRF_Register(TX_ADDR, &rx_addr_val[0]);
     Read_5_Bytes(TX_ADDR, &ret_value[0]);
     
@@ -389,6 +570,7 @@ void Setup_PRX_Device(void)
     //Write to the RX_ADDR_P5..
     uint8_t ret_value[5] = {0};
     uint8_t value_1[5] = {0xb3, 0xb4, 0xb5, 0xb6, 0xf1};
+    //uint8_t value_1[5] = {0xc2, 0xc2, 0xc2, 0xc2, 0xc2};
     Abs_Write_5B_to_nRF_Register_SPI1(RX_ADDR_P1, &value_1[0]);
     Read_5_Bytes_SPI1(RX_ADDR_P1, &ret_value[0]);
    
@@ -458,7 +640,8 @@ void setup_nRF_radio(void)
     Abs_Write_5B_to_nRF_Register(RX_ADDR_P1, &rx_addr_val_1[0]);
     Read_5_Bytes(RX_ADDR_P1, &ret_value[0]);
 
-    Abs_Write_to_nRF_Register(RX_PW_P1, 0x20);
+    //Abs_Write_to_nRF_Register(RX_PW_P1, 0x20);
+    Abs_Write_to_nRF_Register(RX_PW_P1, 4);
     Read_from_nRF(RX_PW_P1, &reg_value);
 
     Write_to_nRF_Register(EN_RXADDR, 0x03);
@@ -504,7 +687,7 @@ void setup_begin_config()
 
     /* Config the value for RF_SETUP */
     /* This sets the data rate to 1Mbps */
-    Abs_Write_to_nRF_Register(RF_SETUP, 0x60); /*RF_DR_HIGH = b'0; RF_PWR = b'11*/
+    Abs_Write_to_nRF_Register(RF_SETUP, 0x06); /*RF_DR_HIGH = b'0; RF_PWR = b'11*/
     Read_from_nRF(RF_SETUP, &reg_value);
 
     /* Set the CRC */
@@ -552,4 +735,5 @@ void loop()
     return;
 }
 
+#endif
 

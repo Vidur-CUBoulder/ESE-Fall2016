@@ -8,6 +8,8 @@
 #include "eeprom.h"
 #include "uart.h"
 
+#define DEBUG
+
 uint8_t Send_EEPROM_Read_Write(uint8_t cmd)
 {
     uint8_t ret_value = 0;
@@ -23,6 +25,9 @@ uint8_t Send_EEPROM_Read_Write(uint8_t cmd)
 
 eeprom_errors Read_Status(uint8_t *read_status_value)
 {
+    if(read_status_value == NULL) {
+        return RETURN_NULL;
+    }
 
     uint8_t return_nRF_value = 0;
     uint8_t ret_value = 0;
@@ -30,69 +35,126 @@ eeprom_errors Read_Status(uint8_t *read_status_value)
     //Pull the CS low first!
     Pull_CS_Low_SPI1();
 
-    //*read_status_value = Send_EEPROM_Read_Write(RDSR);
+    Send_EEPROM_Read_Write(RDSR);
+    /*while(WAIT_FOR_SPTEF_SPI1);
+    SPI1->D = 0x05;
+    while(WAIT_FOR_SPRF_SPI1);
+    ret_value = SPI1->D;*/
 
-    while(!(SPI_S_REG(SPI1) & SPI_S_SPTEF_MASK));
-    SPI1->D = RDSR;
-    while(!(SPI_S_REG(SPI1) & SPI_S_SPRF_MASK));
-    *read_status_value = SPI1->D;
+
+    *read_status_value = Send_EEPROM_Read_Write(0xFF);
+    /*while(WAIT_FOR_SPTEF_SPI1);
+    SPI1->D = 0xFF;
+    while(WAIT_FOR_SPRF_SPI1);
+    ret_value = SPI1->D;*/
     
     //Pull the CS high!
     Pull_CS_High_SPI1();
-    
+  
+    //don't be cheeky!!
+    *read_status_value <<= 1;
+
     return EEPROM_READ_SUCCESSFUL;
 
 }
 
-eeprom_errors Check_Write_Status(void)
+eeprom_errors Enable_Write_Latch()
 {
-    uint8_t get_status = 0;
-    Read_Status(&get_status);
+    uint8_t ret_value = 0;
 
-    /* Check if the RDY bit & the WEL bit is 0 */
-    if (get_status & 0x02) {
-        return READY_TO_WRITE;
-    }
-    if( (get_status & 0x01) ) {
-        /* One of the bits is set
-         * Can't write now; return*/
-        return NOT_READY_TO_WRITE;
-    }
-
-    return READY_TO_WRITE;
-}
-
-eeprom_errors Enable_Write_Ops(void)
-{
-    /*1. Send the WREN instruction to the EEPROM */
+    Pull_CS_Low_SPI1();
     Send_EEPROM_Read_Write(WREN);
-
-    /* 2. Check the write status to make sure that all is ok */
-    eeprom_errors check_write = Check_Write_Status();
-    if(check_write == NOT_READY_TO_WRITE) {
-        return NOT_READY_TO_WRITE;
-    }
-
-    /* 3. Make CSN Low to start writing */
+    Pull_CS_High_SPI1();
    
-    return WRITE_OPS_ENABLED;
+    //delay(20);
+
+    Pull_CS_Low_SPI1();
+    Send_EEPROM_Read_Write(WRSR);
+    Pull_CS_High_SPI1();
+
+    uint8_t read_value = 0;
+    Read_Status(&read_value);
+    
+    return CHK_WEL_SET(read_value);
 }
 
-eeprom_errors Disable_Write_Ops(void)
+eeprom_errors Disable_Write_Latch()
 {
-    /* 1. Send the WRDI instruction */
+    Pull_CS_Low_SPI1();
     Send_EEPROM_Read_Write(WRDI);
+    Pull_CS_High_SPI1();
 
-    eeprom_errors check_write = Check_Write_Status();
-    if( check_write == NOT_READY_TO_WRITE) {
-        return WRITE_OPS_DISABLED;
+    uint8_t read_value = 0;
+    Read_Status(&read_value);
+
+    return CHK_WEL_UNSET(read_value);
+}
+
+eeprom_errors Write_Data_to_EEPROM(uint8_t data, uint8_t *address)
+{
+    if(address == NULL) {
+        return RETURN_NULL;
     }
 
-    return UNKNOWN_FAILURE;
+    /* Check if the WEL latch is set
+     * if not, then set it before proceeding.
+     */
+    uint8_t status_read = 0;
+    Read_Status(&status_read);
+    if(CHK_WEL_SET(status_read) == WEL_SET_FAILURE) {
+        Enable_Write_Latch();
+    }
+    
+    //Send the WRITE instruction..
+
+    Pull_CS_Low_SPI1();
+
+    Send_EEPROM_Read_Write(WRITE);
+
+    //Next, send the byte address
+
+    Send_EEPROM_Read_Write(*address);
+
+    //Lastly, send the byte that you want to write to it..
+
+    Send_EEPROM_Read_Write(data);
+
+    Pull_CS_High_SPI1();
+
+    // Need to disable write ops before exiting...
+    Disable_Write_Latch();
+    
+    return 0;
+
 }
 
+eeprom_errors Read_Data_from_EEPROM(uint8_t *starting_address)
+{
+    if(starting_address == NULL) {
+        return RETURN_NULL;
+    }
 
+    //Check if the WEL latch is disabled!
+    uint8_t status_read = 0;
+    Read_Status(&status_read);
+    if(CHK_WEL_SET(status_read) == WEL_SET_SUCCESS) {
+        Disable_Write_Latch();
+    }
 
+    uint8_t read_value = 0;
 
+    Pull_CS_Low_SPI1();
 
+    Send_EEPROM_Read_Write(READ);
+
+    Send_EEPROM_Read_Write(*starting_address);
+
+    read_value = Send_EEPROM_Read_Write(NOP);
+
+    //don't be cheeky!!
+    read_value <<= 1;
+
+    return 0;
+
+}
 

@@ -30,7 +30,7 @@ void Init_Temp_Sensor(void)
 
 uint8_t Read_Temp_Sensor_Value(uint16_t *value_read)
 {
-    ADC0_SC1A = 26; // Select the channel for the temp. sensor.
+    ADC0_SC1A = TEMP_SENSOR_CHANNEL; // Select the channel for the temp. sensor.
     while(WAIT_FOR_CONVERSION_COMPLETION);
     *value_read = ADC0_RA;
 }
