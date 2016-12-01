@@ -14,8 +14,10 @@ uint8_t Send_EEPROM_Read_Write(uint8_t cmd)
 {
     uint8_t ret_value = 0;
 
+    delay(20);
     while(WAIT_FOR_SPTEF_SPI1);
     SPI1->D = cmd;
+    delay(5);
     while(WAIT_FOR_SPRF_SPI1);
     ret_value = SPI1->D;
 
@@ -42,9 +44,11 @@ eeprom_errors Read_Status(uint8_t *read_status_value)
     ret_value = SPI1->D;*/
 
 
-    *read_status_value = Send_EEPROM_Read_Write(0xFF);
-    /*while(WAIT_FOR_SPTEF_SPI1);
+    *read_status_value = Send_EEPROM_Read_Write(NOP);
+    /*delay(20);
+    while(WAIT_FOR_SPTEF_SPI1);
     SPI1->D = 0xFF;
+    //delay(10);
     while(WAIT_FOR_SPRF_SPI1);
     ret_value = SPI1->D;*/
     
@@ -52,7 +56,7 @@ eeprom_errors Read_Status(uint8_t *read_status_value)
     Pull_CS_High_SPI1();
   
     //don't be cheeky!!
-    *read_status_value <<= 1;
+    //*read_status_value <<= 1;
 
     return EEPROM_READ_SUCCESSFUL;
 
@@ -128,9 +132,78 @@ eeprom_errors Write_Data_to_EEPROM(uint8_t data, uint8_t *address)
 
 }
 
-eeprom_errors Read_Data_from_EEPROM(uint8_t *starting_address)
+eeprom_errors Write_Page_Data_to_EEPROM(uint8_t *data, uint8_t *address,\
+                                        uint8_t length)
 {
-    if(starting_address == NULL) {
+    if(address == NULL || data == NULL) {
+        return RETURN_NULL;
+    }
+
+    if(length > 16) {
+        return INVALID_DATA_WRITE_LENGTH;
+    }
+
+    //Check if the WEL latch is disabled!
+    uint8_t status_read = 0;
+    Read_Status(&status_read);
+    if(CHK_WEL_SET(status_read) == WEL_SET_FAILURE) {
+        Enable_Write_Latch();
+    }
+
+    Pull_CS_Low_SPI1();
+   
+    Send_EEPROM_Read_Write(WRITE);
+
+    Send_EEPROM_Read_Write(*address);
+
+    while(length) {
+        Send_EEPROM_Read_Write(*(data++));
+        length--;
+    }
+
+    Pull_CS_High_SPI1();
+
+    // Need to disable write ops before exiting...
+    Disable_Write_Latch();
+
+    return PAGE_WRITE_SUCCESSFUL;
+
+}
+
+eeprom_errors Read_Page_Data_from_EEPROM(uint8_t *data, uint8_t *starting_address,\
+                                            uint8_t length)
+{
+
+    if(data == NULL || starting_address == NULL) {
+        return RETURN_NULL;
+    }
+    
+    Pull_CS_Low_SPI1();
+
+    Send_EEPROM_Read_Write(READ);
+
+    Send_EEPROM_Read_Write(*starting_address);
+
+    while(length) {
+        *data = Send_EEPROM_Read_Write(NOP);
+        
+        //don't be cheeky!
+        *data <<= 1;
+        
+        data++;
+        length--;
+    }
+
+    Pull_CS_High_SPI1();
+
+    return PAGE_READ_SUCCESSFUL;
+}
+
+
+eeprom_errors Read_Data_from_EEPROM(uint8_t *starting_address,\
+                                    uint8_t *data_ret)
+{
+    if(starting_address == NULL || data_ret == NULL) {
         return RETURN_NULL;
     }
 
@@ -150,9 +223,13 @@ eeprom_errors Read_Data_from_EEPROM(uint8_t *starting_address)
     Send_EEPROM_Read_Write(*starting_address);
 
     read_value = Send_EEPROM_Read_Write(NOP);
+    
+    Pull_CS_High_SPI1();
 
     //don't be cheeky!!
     read_value <<= 1;
+
+    *data_ret = read_value;
 
     return 0;
 

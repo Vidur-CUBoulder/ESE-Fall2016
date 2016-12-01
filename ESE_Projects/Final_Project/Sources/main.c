@@ -41,16 +41,26 @@ int main(void)
 
     spi_1_init();
 
-    uint8_t read_status_value = 0;
-    Read_Status(&read_status_value);
+    //uint8_t read_status_value = 0;
+    //Read_Status(&read_status_value);
 
-    Enable_Write_Latch();
-    Disable_Write_Latch();
+    //Enable_Write_Latch();
+    //Disable_Write_Latch();
 
     uint8_t address = 0x00;
+    //uint8_t data_ret = 0;
 
-    Write_Data_to_EEPROM(10, &address);
-    Read_Data_from_EEPROM(&address);
+    //Write_Data_to_EEPROM(10, &address);
+    //Read_Data_from_EEPROM(&address, &data_ret);
+
+    uint8_t data[4] = {0};
+    uint8_t write_data[4] = {0xAC, 0x48, 0xBA};
+
+    Write_Page_Data_to_EEPROM(&write_data[0], &address, 3);
+
+    Read_Page_Data_from_EEPROM(&data[0], &address, 4);
+
+    delay(10);
 
 #ifdef temp_sensor
 

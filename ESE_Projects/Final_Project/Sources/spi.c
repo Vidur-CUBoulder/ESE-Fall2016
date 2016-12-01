@@ -35,7 +35,6 @@ void spi_1_init(void)
 
 	/* Config the Baud Rate for SPI1 comm. */
 	SPI_BR_REG(SPI1) = SPI1_BAUD_RATE;
-	//SPI_BR_REG(SPI1) = 0x00;
 
 	/*Config the C1 SPI1 register as master connection */
 	SPI1->C1 = SPI1_C1_CONFIG;

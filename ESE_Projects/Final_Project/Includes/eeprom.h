@@ -30,7 +30,14 @@ typedef enum eeprom_errors_e {
     
     //Disable_Write_Latch
     WEL_UNSET_FAILURE,
-    WEL_UNSET_SUCCESS
+    WEL_UNSET_SUCCESS,
+
+    //Write_Page_Data_to_EEPROM
+    INVALID_DATA_WRITE_LENGTH,
+    PAGE_WRITE_SUCCESSFUL,
+
+    //Read_Page_Data_from_EEPROM
+    PAGE_READ_SUCCESSFUL
 } eeprom_errors;
 
 
@@ -44,28 +51,95 @@ typedef enum eeprom_errors_e {
  * *********************************
  */
 
-#define WREN    0x06 //Enable Write Ops
-#define WRDI    0x04 //Disable Write Ops
-#define RDSR    0x05 //Read the Status Register
-#define WRSR    0x01 //Write to the Status Register
-#define READ    0x03 //Read Data from the memory
-#define WRITE   0x02 //Write Data to the memory
-#define NOP     0xFF //Dummy to push the data out from the SPI
+typedef enum eeprom_instrctions_t {
+    WREN        =  0x06, 
+    WRDI        =  0x04,  
+    RDSR        =  0x05,
+    WRSR        =  0x01,
+    READ        =  0x03,
+    WRITE       =  0x02
+} eeprom_instructions;
 
+/*Function: Send_EEPROM_Read_Write(uint8_t cmd)
+ * Parameters: take the input command that has to be passed to the 
+ *             EEPROM. This can either be the opcode or any data that
+ *             has to be written or read from the eeprom.
+ * Return: returns the value that is shifted out from the 
+ *         EEPROM IC.
+ * Description: Function to read/write values to the eeprom.
+ */
 uint8_t Send_EEPROM_Read_Write(uint8_t cmd);
 
+/*Function: Read_Status(uint8_t *read_status_value)
+ * Parameters: var. in which you want to store the read value.
+ * Return: a debug handle that can help in debugging.
+ * Description: used to read the value from the status register.
+ */
 eeprom_errors Read_Status(uint8_t *read_status_value);
 
+/* Function: Enable_Write(void)
+ * Parameters: void
+ * Return: a return handle for debugging purposes.
+ * Description: Set the Write Enable Latch in the Status register.
+ */
 eeprom_errors Enable_Write_Latch(void);
 
-eeprom_errors Check_Write_Status(void);
-
-eeprom_errors Enable_Write_Ops(void);
-
+/* Function: Disable_Write_Latch(void)
+ * Parameter: void
+ * Return: a handle that you can use for debugging.
+ * Description: Used to Disable the Write Enable Latch in the Status 
+ *              register. It is recommended that this function be called
+ *              after every write opertation is completed.
+ */
 eeprom_errors Disable_Write_Latch(void);
 
+/* Function: Write_Data_to_EEPROM(uint8_t data, uint8_t *address)
+ * Parameters: 
+ *      a. data: value that you want to write into the EEPROM memory.
+ *      b. address: address in the EEPROM that you want to write to.
+ * Return: a handle that you can use for debugging.
+ * Description: Used to write data into the EEPROM memory.
+ */
 eeprom_errors Write_Data_to_EEPROM(uint8_t data, uint8_t *address);
 
-eeprom_errors Read_Data_from_EEPROM(uint8_t *starting_address);
+/* Function: Read_Data_from_EEPROM(uint8_t *starting_address, uint8_t *data_ret)
+ * Parameters: 
+ *      a. starting_address: the address from which you want to read the data.
+ *      b. data_ret: value that is read from the EEPROM memory.
+ * Return: a handle that you can use for debugging.
+ * Description: Used to read a byte of data from the EEPROM memory.
+ */
+eeprom_errors Read_Data_from_EEPROM(uint8_t *starting_address,\
+                                    uint8_t *data_ret);
+
+/* Function: Write_Page_Data_to_EEPROM(uint8_t *data, uint8_t *address,\
+ *                                              uint8_t length)
+ * Parameters:
+ *      a. *data: data that you want to write into the EEPROM memory.
+ *      b. *address: the address starting from which you want to write 
+ *                   to the memory.
+ *      c. length: the length of the data that you want to write into the memory.                    
+ *                 Please note that no more that 16 bytes can be written into the                    
+ *                 memory at any given point in time.
+ * Return: a debug handle that can be used for debugging.
+ * Description: Used to write at most 16B of data into the memory.
+ */
+eeprom_errors Write_Page_Data_to_EEPROM(uint8_t *data, uint8_t *address,\
+                                        uint8_t length);
+
+/* Function: Read_Page_Data_to_EEPROM(uint8_t *data, uint8_t *address,\
+ *                                        uint8_t length)
+ * Parameters:
+ *      a. *data: the address starting from which you want to read from the memory. 
+ *      b. *address: the address starting from which you want to read from the memory.
+ *      c. length: the length of the data that you want to write into the memory.                    
+ *                 Please note that no more that 16 bytes can be written into the                    
+ *                 memory at any given point in time.
+ * Return: a debug handle that can be used from debugging.
+ * Description: Used to read at most 16B of data from the memory.
+ */
+eeprom_errors Read_Page_Data_from_EEPROM(uint8_t *data, uint8_t *starting_address,
+                                            uint8_t length);
+
 
 #endif /* INCLUDES_EEPROM_H_ */
