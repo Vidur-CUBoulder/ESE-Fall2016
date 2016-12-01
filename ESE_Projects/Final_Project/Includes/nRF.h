@@ -108,10 +108,11 @@ void setup_begin_config();
 
 void setup_nRF_radio();
 
-int8_t Flush_RX(void);
+void Flush_RX_SPI0(void);
 void Flush_RX_SPI1(void);
 
-int8_t Flush_TX(void);
+void Flush_TX_SPI0(void);
+void Flush_TX_SPI1(void);
 
 uint8_t Abs_Write_5B_to_nRF_Register(reg_map reg, uint8_t *value);
 
@@ -137,5 +138,11 @@ void set_device_addr(void);
 
 void Setup_TX(void);
 
+void config_tx_addr();
+void config_rx_addr();
+
+void fill_tx_buffer();
+
+void nrf_Config_PTX();
 
 #endif /* INCLUDES_NRF_H_ */

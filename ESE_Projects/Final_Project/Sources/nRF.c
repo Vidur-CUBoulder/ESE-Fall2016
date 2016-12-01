@@ -143,12 +143,33 @@ void Dump_SPI0_Reg(void)
     Read_from_nRF_Register(RX_PW_P5, &reg_value);
 }
 
+void Flush_TX_SPI1(void)
+{
+    Pull_CS_Low_SPI1();
+   
+    uint8_t cmd = FLUSH_TX;
+    Send_Read_Write_Command_SPI1(&cmd);
+    delay(10);
+    
+    Pull_CS_High_SPI1();
+}
 
-int8_t Flush_TX(void)
+void Flush_TX_SPI0(void)
 {
     Pull_CS_Low();
    
     uint8_t cmd = FLUSH_TX;
+    Send_Read_Write_Command(&cmd);
+    delay(10);
+    
+    Pull_CS_High();
+}
+
+void Flush_RX_SPI0(void)
+{
+    Pull_CS_Low();
+    
+    uint8_t cmd = FLUSH_RX;
     Send_Read_Write_Command(&cmd);
     delay(10);
     
@@ -300,6 +321,141 @@ uint8_t Abs_Write_5B_to_nRF_Register(reg_map reg, uint8_t *value)
 
 }
 
+/* << SPI 0 >> */
+void nrf_Config_PTX()
+{
+
+    /*  Config Information:->
+     *  RF_CH : Channel : 2 
+     *  RX_PW_P1 : Payload_Length: 4
+     *  RF_SETUP : 1Mbps, TX gain: 0db
+     *  CONFIG :  CRC enabled, 1B CRC length
+     *  EN_AA : pipes 0 and 1
+     *  EN_RXADDR : again pipes 0 and 1
+     *  SETUP_RETR : 1000us and 15 re-trans trials
+     *  disable DYNPD completely
+     */
+
+    /* RF_CH */
+    Abs_Write_to_nRF_Register(RF_CH, 2);
+    Abs_Write_to_nRF_Register_SPI1(RF_CH, 2);
+
+    /* RX_PW_P1 */
+    Abs_Write_to_nRF_Register(RX_PW_P1, 4);
+    Abs_Write_to_nRF_Register_SPI1(RX_PW_P1, 4);
+
+    /* RF_SETUP */
+    Abs_Write_to_nRF_Register(RF_SETUP, 0x06);
+    Abs_Write_to_nRF_Register_SPI1(RF_SETUP, 0x06);
+
+    /* CONFIG --> CRC en and 1B CRC len */
+    Abs_Write_to_nRF_Register(CONFIG, 0x08);
+    Abs_Write_to_nRF_Register_SPI1(CONFIG, 0x08);
+   
+    /* EN_AA --> pipes 0 and 1 */
+    Abs_Write_to_nRF_Register(EN_AA, 0x03);
+    Abs_Write_to_nRF_Register_SPI1(EN_AA, 0x03);
+
+    /* EN_RXADDR */
+    Abs_Write_to_nRF_Register(EN_RXADDR, 0x03);
+    Abs_Write_to_nRF_Register_SPI1(EN_RXADDR, 0x03);
+
+    /* SETUP_RETR */
+    Abs_Write_to_nRF_Register(SETUP_RETR, 0x4F);
+    Abs_Write_to_nRF_Register_SPI1(SETUP_RETR, 0x4F);
+
+    /* Disable DYNPD */
+    Abs_Write_to_nRF_Register(DYNPD, 0x00);
+    Abs_Write_to_nRF_Register_SPI1(DYNPD, 0x00);
+    
+    //--------- end of TX config ---------------------
+
+    /* Flush the TX and RX for the PTX */
+    Flush_RX_SPI0();
+    Flush_RX_SPI1();
+    Flush_TX_SPI0();
+    Flush_TX_SPI1();
+
+    /* Next, clear the bits of the STATUS register */
+    Write_to_nRF_Register(STATUS, 0x70);
+    Write_to_nRF_Register_SPI1(STATUS, 0x70);
+
+
+    /* << CRITICAL! >> */
+    /* Make CE low; set the module as RX and power up the module; set CE high */
+    //CE_SPI1_Low();
+    //Write_to_nRF_Register(CONFIG, 0x03);
+    //Write_to_nRF_Register_SPI1(CONFIG, 0x03);
+    //CE_SPI1_High();
+     
+}
+
+void config_tx_addr()
+{
+    // First the TX addr.
+    
+    /* RX_ADDR_P0 must be set to the sending address for the auto ack to work! */
+    uint8_t ret_value[5] = {0};
+    uint8_t rx_addr_val[] = { 0xe7, 0xe7, 0xe7, 0xe7, 0xe7 };
+
+    Abs_Write_5B_to_nRF_Register(RX_ADDR_P0, &rx_addr_val[0]);
+    Read_5_Bytes(RX_ADDR_P0, &ret_value[0]);
+    
+    Abs_Write_5B_to_nRF_Register(TX_ADDR, &rx_addr_val[0]);
+    Read_5_Bytes(TX_ADDR, &ret_value[0]);
+
+    uint8_t value_1[5] = {0xd7, 0xd7, 0xd7, 0xd7, 0xd7};
+    Abs_Write_5B_to_nRF_Register(RX_ADDR_P1, &value_1[0]);
+    Read_5_Bytes(RX_ADDR_P1, &ret_value[0]);
+    
+}
+
+void config_rx_addr()
+{
+    uint8_t ret_value[5] = {0};
+    uint8_t rx_addr_val[] = { 0xd7, 0xd7, 0xd7, 0xd7, 0xd7 };
+
+    Abs_Write_5B_to_nRF_Register_SPI1(RX_ADDR_P0, &rx_addr_val[0]);
+    Read_5_Bytes_SPI1(RX_ADDR_P0, &ret_value[0]);
+    
+    Abs_Write_5B_to_nRF_Register_SPI1(TX_ADDR, &rx_addr_val[0]);
+    Read_5_Bytes_SPI1(TX_ADDR, &ret_value[0]);
+
+    uint8_t value_1[5] = {0xe7, 0xe7, 0xe7, 0xe7, 0xe7};
+    Abs_Write_5B_to_nRF_Register_SPI1(RX_ADDR_P1, &value_1[0]);
+    Read_5_Bytes_SPI1(RX_ADDR_P1, &ret_value[0]);
+}
+
+void fill_tx_buffer()
+{
+    uint8_t data[4] = {0x00, 0xAA, 0x55, 0x01};
+    
+    //Write to the TX payload!
+     
+    Pull_CS_Low();
+    
+    uint8_t cmd = W_TX_PAYLOAD;
+    Send_Read_Write_Command(&cmd);
+    
+    delay(10);
+
+    //Now start pushing the data into the payload buffer!
+    uint8_t i = 0;
+    uint8_t len = 4;
+    while(len) {
+        Send_Write_Value(data[i]);
+        i++;
+        len--;
+    }
+    
+    Pull_CS_High();
+
+}
+
+
+
+#if 0
+
 /* Setup Common nRF Characteristics */
 void setup_common_nRF_char(void)
 {
@@ -310,8 +466,8 @@ void setup_common_nRF_char(void)
 	uint8_t reg_value = 0;
 
     /*1. Setup the RF channel */
-    Abs_Write_to_nRF_Register(RF_CH, 76);
-    Abs_Write_to_nRF_Register_SPI1(RF_CH, 76);
+    Abs_Write_to_nRF_Register(RF_CH, 2);
+    Abs_Write_to_nRF_Register_SPI1(RF_CH, 2);
     Read_from_nRF_Register(RF_CH, &reg_value);
 
     /*2. Config the payload length on p1 */
@@ -466,6 +622,8 @@ void Setup_TX(void)
     delay(200);
 
 }
+
+#endif
 
 #if 0
 

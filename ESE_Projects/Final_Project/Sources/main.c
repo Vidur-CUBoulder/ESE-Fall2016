@@ -33,10 +33,12 @@
 //#define SPI_Read_Write_Working
 //#define DEBUG
 //#define temp_sensor
-//#define SPI0_Rx_nRF_Comm
+#define SPI0_Rx_nRF_Comm
 
 int main(void)
 {
+
+#ifdef EEPROM
     uint8_t out = 0;
 
     spi_1_init();
@@ -62,6 +64,8 @@ int main(void)
 
     delay(10);
 
+#endif
+
 #ifdef temp_sensor
 
     Init_Temp_Sensor();
@@ -84,24 +88,62 @@ int main(void)
 
     spi_0_init();
     spi_1_init();
+   
+    // we don't want these to be causing troubles
+    CE_SPI1_Low();
+    CE_SPI0_Low();
 
     reset_all_registers_SPI1();
     reset_all_registers_SPI0();
     
-    //Setup_PTX_Device();
-    //Setup_PRX_Device();
-   
-    setup_common_nRF_char();
-    set_device_addr();
-    Setup_TX();
-
-    delay(80);
+    nrf_Config_PTX();
+    config_tx_addr();
+    config_rx_addr();
+    fill_tx_buffer();
     
-    CE_SPI0_Low();
-    CE_SPI1_Low();
-
     Dump_SPI0_Reg();
     Dump_SPI1_Reg();
+
+    //csn for both modules shld be high, no SPI writes!!
+    Pull_CS_High_SPI1();
+    Pull_CS_High();
+
+    //power up both modules and make sure that the config is set acc.
+    Write_to_nRF_Register_SPI1(CONFIG, 0x03); //PRX
+    Read_from_nRF_Register_SPI1(CONFIG, &reg_value);
+    Write_to_nRF_Register(CONFIG, 0x02); //PTX
+    Read_from_nRF_Register(CONFIG, &reg_value);
+     
+    //raise the CE pins for both.. this shld do the trick!
+    CE_SPI1_High();
+    CE_SPI0_High();
+
+    delay(200);
+
+    CE_SPI1_Low();
+    CE_SPI0_Low();
+    
+    Dump_SPI0_Reg();
+    Dump_SPI1_Reg();
+
+    Pull_CS_Low_SPI1();
+    
+    uint8_t cmd = R_RX_PAYLOAD;
+    Send_Read_Write_Command_SPI1(&cmd);
+    
+    delay(10);
+    
+    uint8_t data[4] = {0};
+    uint8_t len = 4, i = 0;
+    while(len) {
+        data[i] = Send_Read_Write_Command_SPI1(NOP);
+        i++;
+        len--;
+    }
+
+    delay(3);
+
+
 
 #if 0
     /* XXX: Leaving this snippet here for Ref.! */
