@@ -14,10 +14,8 @@ uint8_t Send_EEPROM_Read_Write(uint8_t cmd)
 {
     uint8_t ret_value = 0;
 
-    delay(20);
     while(WAIT_FOR_SPTEF_SPI1);
     SPI1->D = cmd;
-    delay(5);
     while(WAIT_FOR_SPRF_SPI1);
     ret_value = SPI1->D;
 
@@ -35,7 +33,8 @@ eeprom_errors Read_Status(uint8_t *read_status_value)
     uint8_t ret_value = 0;
 
     //Pull the CS low first!
-    Pull_CS_Low_SPI1();
+    GPIOD_PCOR = 0x00000010;
+    //Pull_CS_Low(SPI1);
 
     Send_EEPROM_Read_Write(RDSR);
     /*while(WAIT_FOR_SPTEF_SPI1);
@@ -43,20 +42,21 @@ eeprom_errors Read_Status(uint8_t *read_status_value)
     while(WAIT_FOR_SPRF_SPI1);
     ret_value = SPI1->D;*/
 
+    delay(20);
 
     *read_status_value = Send_EEPROM_Read_Write(NOP);
-    /*delay(20);
-    while(WAIT_FOR_SPTEF_SPI1);
+
+    /*while(WAIT_FOR_SPTEF_SPI1);
     SPI1->D = 0xFF;
-    //delay(10);
     while(WAIT_FOR_SPRF_SPI1);
     ret_value = SPI1->D;*/
     
     //Pull the CS high!
-    Pull_CS_High_SPI1();
+    GPIOD_PSOR = 0x00000010;
+    //Pull_CS_High(SPI1);
   
     //don't be cheeky!!
-    //*read_status_value <<= 1;
+    *read_status_value <<= 1;
 
     return EEPROM_READ_SUCCESSFUL;
 
@@ -66,15 +66,15 @@ eeprom_errors Enable_Write_Latch()
 {
     uint8_t ret_value = 0;
 
-    Pull_CS_Low_SPI1();
+    Pull_CS_Low(SPI1);
     Send_EEPROM_Read_Write(WREN);
-    Pull_CS_High_SPI1();
+    Pull_CS_High(SPI1);
    
     //delay(20);
 
-    Pull_CS_Low_SPI1();
+    Pull_CS_Low(SPI1);
     Send_EEPROM_Read_Write(WRSR);
-    Pull_CS_High_SPI1();
+    Pull_CS_High(SPI1);
 
     uint8_t read_value = 0;
     Read_Status(&read_value);
@@ -84,9 +84,9 @@ eeprom_errors Enable_Write_Latch()
 
 eeprom_errors Disable_Write_Latch()
 {
-    Pull_CS_Low_SPI1();
+    Pull_CS_Low(SPI1);
     Send_EEPROM_Read_Write(WRDI);
-    Pull_CS_High_SPI1();
+    Pull_CS_High(SPI1);
 
     uint8_t read_value = 0;
     Read_Status(&read_value);
@@ -111,7 +111,7 @@ eeprom_errors Write_Data_to_EEPROM(uint8_t data, uint8_t *address)
     
     //Send the WRITE instruction..
 
-    Pull_CS_Low_SPI1();
+    Pull_CS_Low(SPI1);
 
     Send_EEPROM_Read_Write(WRITE);
 
@@ -123,7 +123,7 @@ eeprom_errors Write_Data_to_EEPROM(uint8_t data, uint8_t *address)
 
     Send_EEPROM_Read_Write(data);
 
-    Pull_CS_High_SPI1();
+    Pull_CS_High(SPI1);
 
     // Need to disable write ops before exiting...
     Disable_Write_Latch();
@@ -150,7 +150,7 @@ eeprom_errors Write_Page_Data_to_EEPROM(uint8_t *data, uint8_t *address,\
         Enable_Write_Latch();
     }
 
-    Pull_CS_Low_SPI1();
+    Pull_CS_Low(SPI1);
    
     Send_EEPROM_Read_Write(WRITE);
 
@@ -161,7 +161,7 @@ eeprom_errors Write_Page_Data_to_EEPROM(uint8_t *data, uint8_t *address,\
         length--;
     }
 
-    Pull_CS_High_SPI1();
+    Pull_CS_High(SPI1);
 
     // Need to disable write ops before exiting...
     Disable_Write_Latch();
@@ -178,7 +178,7 @@ eeprom_errors Read_Page_Data_from_EEPROM(uint8_t *data, uint8_t *starting_addres
         return RETURN_NULL;
     }
     
-    Pull_CS_Low_SPI1();
+    Pull_CS_Low(SPI1);
 
     Send_EEPROM_Read_Write(READ);
 
@@ -194,7 +194,7 @@ eeprom_errors Read_Page_Data_from_EEPROM(uint8_t *data, uint8_t *starting_addres
         length--;
     }
 
-    Pull_CS_High_SPI1();
+    Pull_CS_High(SPI1);
 
     return PAGE_READ_SUCCESSFUL;
 }
@@ -216,7 +216,7 @@ eeprom_errors Read_Data_from_EEPROM(uint8_t *starting_address,\
 
     uint8_t read_value = 0;
 
-    Pull_CS_Low_SPI1();
+    Pull_CS_Low(SPI1);
 
     Send_EEPROM_Read_Write(READ);
 
@@ -224,7 +224,7 @@ eeprom_errors Read_Data_from_EEPROM(uint8_t *starting_address,\
 
     read_value = Send_EEPROM_Read_Write(NOP);
     
-    Pull_CS_High_SPI1();
+    Pull_CS_High(SPI1);
 
     //don't be cheeky!!
     read_value <<= 1;

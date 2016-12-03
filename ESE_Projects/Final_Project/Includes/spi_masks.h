@@ -10,72 +10,90 @@
 
 #include "MKL25Z4.h"
 
-#define CE_SPI0_High() (GPIOC_PSOR |= 0x00000008) 
-#define CE_SPI1_High() (GPIOD_PSOR |= 0x00000008) 
+/* Function: CE_High(x)
+ * Parameters: the SPI type
+ * Return: makes the particular GPIO high.
+ */
+#define CE_High(x) (x == SPI0)?(GPIOC_PSOR |= 0x00000008):\
+                                (GPIOD_PSOR |= 0x00000008)
 
+/* Function: CE_Low(x)
+ * Parameters: the SPI type
+ * Return: makes the particular GPIO low.
+ */
+#define CE_Low(x) (x == SPI0)?(GPIOC_PCOR |= 0x00000008):\
+                            (GPIOD_PCOR |= 0x00000008)
 
-#define CE_SPI0_Low() (GPIOC_PCOR |= 0x00000008)
-#define CE_SPI1_Low() (GPIOD_PCOR |= 0x00000008)
+/* Function: WAIT_FOR_SPTEF(x)
+ * Paramters: the SPI type
+ * Return: the corresponding SPI - TEF(transfer buffer chk bit) check condition
+ */
+#define WAIT_FOR_SPTEF(x) (x == SPI0) ? ( !(SPI_S_REG(SPI0) & SPI_S_SPTEF_MASK)):\
+                                        ( !(SPI_S_REG(SPI1) & SPI_S_SPTEF_MASK))
 
-#define WAIT_FOR_SPTEF ( !(SPI_S_REG(SPI0) & SPI_S_SPTEF_MASK))
+#define WAIT_FOR_SPTEF_SPI0 ( !(SPI_S_REG(SPI0) & SPI_S_SPTEF_MASK))
 #define WAIT_FOR_SPTEF_SPI1 ( !(SPI_S_REG(SPI1) & SPI_S_SPTEF_MASK))
 
-#define WAIT_FOR_SPRF ( !(SPI_S_REG(SPI0) & SPI_S_SPRF_MASK))
+/* Function: WAIT_FOR_SPRF(x)
+ * Paramters: the SPI type
+ * Return: the corresponding SPI - RF(receive buffer check bit) check condition
+ */
+#define WAIT_FOR_SPRF(x) (x == SPI0) ? ( !(SPI_S_REG(SPI0) & SPI_S_SPRF_MASK)):\
+                                        ( !(SPI_S_REG(SPI1) & SPI_S_SPRF_MASK))
+#define WAIT_FOR_SPRF_SPI0 ( !(SPI_S_REG(SPI0) & SPI_S_SPRF_MASK))
 #define WAIT_FOR_SPRF_SPI1 ( !(SPI_S_REG(SPI1) & SPI_S_SPRF_MASK))
+
 
 /*Function: Pull_CS_Low() & Pull_CS_Low_SPI1()
  * Parameters: void
  * Description: Pull the CS line low and start the SPI transmission.
  */
-#define Pull_CS_Low() (GPIOC_PCOR = 0x00000010)
 
-#define Pull_CS_Low_SPI1() (GPIOD_PCOR = 0x00000010)
+#define Pull_CS_Low(x) (x == SPI0)?(GPIOC_PCOR = 0x00000010):\
+                            (GPIOD_PCOR = 0x00000010)
 
 /*Function: Pull_CS_High() & Pull_CS_High_SPI1()
  * Parameters: void
  * Description: Pull the CS line high and stop the SPI transmission.
  */
-#define Pull_CS_High() (GPIOC_PSOR = 0x00000010)
 
-#define Pull_CS_High_SPI1() (GPIOD_PSOR = 0x00000010)
-
+#define Pull_CS_High(x) (x == SPI0)?(GPIOC_PSOR = 0x00000010):\
+                                    (GPIOD_PSOR = 0x00000010)                           
 /* SPI1 Initialization Macrons */
 
-#define SET_SPI1_CLK_GATE 0x00800000
-#define SET_CLK_GATE_PORT_D 0x00001000
+#define SET_SPI1_CLK_GATE       0x00800000
+#define SET_CLK_GATE_PORT_D     0x00001000
 
-#define CONFIG_PORTD3_GPIO 0x00000100
-#define CONFIG_PORTD4_GPIO 0x00000100
-#define CONFIG_PORTD4_DIR_OUT 0x00000010 
-#define CONFIG_PORTD3_DIR_OUT 0x00000008 
+#define CONFIG_PORTD3_GPIO      0x00000100
+#define CONFIG_PORTD4_GPIO      0x00000100
+#define CONFIG_PORTD4_DIR_OUT   0x00000010 
+#define CONFIG_PORTD3_DIR_OUT   0x00000008 
 
-#define CONFIG_PORTD5_SPI_SCK 0x00000200
-#define CONFIG_PORTD6_SPI_MOSI 0x00000200
-#define CONFIG_PORTD7_SPI_MISO 0x00000200
+#define CONFIG_PORTD5_SPI_SCK   0x00000200
+#define CONFIG_PORTD6_SPI_MOSI  0x00000200
+#define CONFIG_PORTD7_SPI_MISO  0x00000200
 
-#define SPI1_BAUD_RATE 0x30
+#define SPI1_BAUD_RATE  0x30
 
-#define SPI1_C1_CONFIG 0x50 /* SPE = 1 & MSTR = 1 */ 
+#define SPI_C1_CONFIG   0x50 /* SPE = 1 & MSTR = 1 */ 
 
 /*SPI0 Initialization Macros*/
 
-#define SET_SPI0_CLK_GATE 0x00400000
-#define SET_CLK_GATE_PORT_C 0x00000800
+#define SET_SPI0_CLK_GATE       0x00400000
+#define SET_CLK_GATE_PORT_C     0x00000800
 
-#define CONFIG_PORTC3_GPIO 0x00000100
-#define CONFIG_PORTC11_DIR_OUT 0x00000800
+#define CONFIG_PORTC3_GPIO      0x00000100
+#define CONFIG_PORTC11_DIR_OUT  0x00000800
 
-#define CONFIG_PORTC4_GPIO 0x00000100
-#define CONFIG_PORTC3_DIR_OUT 0x00000008
-#define CONFIG_PORTC4_DIR_OUT 0x00000010
+#define CONFIG_PORTC4_GPIO      0x00000100
+#define CONFIG_PORTC3_DIR_OUT   0x00000008
+#define CONFIG_PORTC4_DIR_OUT   0x00000010
 
-#define CONFIG_PORTC5_SPI_SCK 0x00000200
-#define CONFIG_PORTC6_SPI_MOSI 0x00000200
-#define CONFIG_PORTC7_SPI_MISO 0x00000200
+#define CONFIG_PORTC5_SPI_SCK   0x00000200
+#define CONFIG_PORTC6_SPI_MOSI  0x00000200
+#define CONFIG_PORTC7_SPI_MISO  0x00000200
 
 #define SPI0_BAUD_RATE 0x30
-
-#define SPI0_C1_CONFIG 0x50 /*SPE = 1 & MSTR = 1*/
 
 /* Command Word Masks */
 

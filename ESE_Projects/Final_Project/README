@@ -1,3 +1,50 @@
 Project 4 -- Under Contruction
 
+File Organization:
+├── [ 918]  Includes
+│   ├── [439K]  MKL25Z4.h
+│   ├── [ 43K]  core_cm0plus.h
+│   ├── [112K]  core_cm4.h
+│   ├── [ 22K]  core_cm4_simd.h
+│   ├── [135K]  core_cm7.h
+│   ├── [ 18K]  core_cmFunc.h
+│   ├── [ 27K]  core_cmInstr.h
+│   ├── [ 22K]  core_cmSimd.h
+│   ├── [1.6K]  data.h
+│   ├── [1.1K]  dma.h
+│   ├── [5.1K]  eeprom.h
+│   ├── [ 434]  error_handling.h
+│   ├── [ 300]  ftoa.h
+│   ├── [ 216]  led.h
+│   ├── [ 409]  log.h
+│   ├── [ 385]  main.h
+│   ├── [1.2K]  memory.h
+│   ├── [3.1K]  nRF.h
+│   ├── [3.2K]  parse_data.h
+│   ├── [2.7K]  spi.h
+│   ├── [4.5K]  spi_masks.h
+│   ├── [ 17K]  system_MKL25Z4.h
+│   ├── [1.1K]  temperature_sensor.h
+│   ├── [ 290]  timer.h
+│   └── [1.3K]  uart.h
+├── [  33]  README
+└── [ 612]  Sources
+├── [2.8K]  data.c
+├── [5.0K]  dma.c
+├── [4.4K]  eeprom.c
+├── [1.3K]  error_handling.c
+├── [1.3K]  ftoa.c
+├── [5.1K]  led.c
+├── [2.9K]  log.c
+├── [6.8K]  main.c
+├── [1.3K]  memory.c
+├── [ 11K]  nRF.c
+├── [7.2K]  parse_data.c
+├── [6.8K]  spi.c
+├── [ 991]  temperature_sensor.c
+├── [1.2K]  timer.c
+└── [2.5K]  uart.c
+
+
+
 

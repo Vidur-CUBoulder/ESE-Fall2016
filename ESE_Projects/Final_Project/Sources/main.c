@@ -31,9 +31,11 @@
 #include "main.h"
 
 //#define SPI_Read_Write_Working
+//#define READ_PRINT_SINGLE_BYTE
 //#define DEBUG
 //#define temp_sensor
-#define SPI0_Rx_nRF_Comm
+//#define SPI0_Rx_nRF_Comm
+//#define EEPROM
 
 int main(void)
 {
@@ -43,8 +45,8 @@ int main(void)
 
     spi_1_init();
 
-    //uint8_t read_status_value = 0;
-    //Read_Status(&read_status_value);
+    uint8_t read_status_value = 0;
+    Read_Status(&read_status_value);
 
     //Enable_Write_Latch();
     //Disable_Write_Latch();
@@ -56,7 +58,7 @@ int main(void)
     //Read_Data_from_EEPROM(&address, &data_ret);
 
     uint8_t data[4] = {0};
-    uint8_t write_data[4] = {0xAC, 0x48, 0xBA};
+    uint8_t write_data[4] = {0xAC, 0x48, 0xBA, 0xCD};
 
     Write_Page_Data_to_EEPROM(&write_data[0], &address, 3);
 
@@ -85,81 +87,68 @@ int main(void)
     /* Put all the Values back to what they should be! */
 
     uint8_t reg_value = 0;
+    uint8_t data[4] = { 0x41, 0xC5, 0xF4, 0x56 };
 
     spi_0_init();
     spi_1_init();
    
     // we don't want these to be causing troubles
-    CE_SPI1_Low();
-    CE_SPI0_Low();
+    CE_Low(SPI1);
+    CE_Low(SPI0);
 
-    reset_all_registers_SPI1();
-    reset_all_registers_SPI0();
+    reset_all_registers(SPI1);
+    reset_all_registers(SPI0);
     
-    nrf_Config_PTX();
+    nrf_Config_PTX_PRX();
     config_tx_addr();
     config_rx_addr();
-    fill_tx_buffer();
+    fill_tx_buffer(&data[0]);
     
-    Dump_SPI0_Reg();
-    Dump_SPI1_Reg();
+    //power up both modules and make sure that the config is set acc.
+    Write_to_nRF_Register(SPI1, CONFIG, 0x03); //PRX
+    Read_from_nRF_Register(SPI1, CONFIG, &reg_value);
+    Write_to_nRF_Register(SPI0, CONFIG, 0x02); //PTX
+    Read_from_nRF_Register(SPI0, CONFIG, &reg_value);
+
+    Dump_Reg(SPI0);
+    Dump_Reg(SPI1);
 
     //csn for both modules shld be high, no SPI writes!!
-    Pull_CS_High_SPI1();
-    Pull_CS_High();
-
-    //power up both modules and make sure that the config is set acc.
-    Write_to_nRF_Register_SPI1(CONFIG, 0x03); //PRX
-    Read_from_nRF_Register_SPI1(CONFIG, &reg_value);
-    Write_to_nRF_Register(CONFIG, 0x02); //PTX
-    Read_from_nRF_Register(CONFIG, &reg_value);
+    Pull_CS_High(SPI1);
+    Pull_CS_High(SPI0);
      
     //raise the CE pins for both.. this shld do the trick!
-    CE_SPI1_High();
-    CE_SPI0_High();
+    CE_High(SPI1);
+    CE_High(SPI0);
 
     delay(200);
+    delay(200);
 
-    CE_SPI1_Low();
-    CE_SPI0_Low();
+    CE_Low(SPI1);
+    CE_Low(SPI0);
     
-    Dump_SPI0_Reg();
-    Dump_SPI1_Reg();
+    Dump_Reg(SPI0);
+    Dump_Reg(SPI1);
 
-    Pull_CS_Low_SPI1();
+    Pull_CS_Low(SPI1);
     
     uint8_t cmd = R_RX_PAYLOAD;
-    Send_Read_Write_Command_SPI1(&cmd);
+    Send_Read_Write_Command(SPI1, &cmd);
     
     delay(10);
-    
-    uint8_t data[4] = {0};
+   
+    cmd = NOP;
+    uint8_t data_1[4] = {0};
     uint8_t len = 4, i = 0;
     while(len) {
-        data[i] = Send_Read_Write_Command_SPI1(NOP);
+        data_1[i] = Send_Read_Write_Command(SPI1, &cmd);
         i++;
         len--;
     }
 
     delay(3);
 
-
-
-#if 0
-    /* XXX: Leaving this snippet here for Ref.! */
-    reg_addr = W_REGISTER | EN_RXADDR;
-    write_value = 0x03;// Set PWR_UP and PRIM_RX
-    //write_value = 0x1F;// Set PWR_UP and PRIM_RX
-    Write_to_nRF_Register(&reg_addr, write_value);
-
-#ifdef DEBUG
-    /* Now reading the value to verify! */
-    reg_addr = R_REGISTER | EN_RXADDR;
-    ret_debug_handle = Read_Single_Byte(&reg_addr, &return_val);
-    MY_LOG_PARAMS("Read Operation Output(post write) CONFIG: ", return_val);
-    MY_LOG("\n");
-#endif
-#endif
+    Pull_CS_High(SPI1);
 
 #endif
 
@@ -177,14 +166,14 @@ int main(void)
 	/*Config the value to be written to that register*/
 	uint8_t write_value = 0x11;
 
-	ret_debug_handle = Read_5_Bytes(TX_ADDR, &return_val[0]);
+	ret_debug_handle = Read_5_Bytes(SPI0, TX_ADDR, &return_val[0]);
 	for(cntr=0; cntr<5; cntr++){
 		out[cntr] = return_val[cntr];
-		MY_LOG_PARAMS("Write Operation Output: ", out[cntr]);
+		//MY_LOG_PARAMS("Write Operation Output: ", out[cntr]);
 	}
 	MY_LOG("\n");
 
-	ret_debug_handle = Write_to_nRF_Register(TX_ADDR, write_value);
+	ret_debug_handle = Abs_Write_to_nRF_Register(SPI0, TX_ADDR, write_value);
 	for(cntr=0; cntr<5; cntr++){
 			out[cntr] = return_val[cntr];
 	}
@@ -193,21 +182,21 @@ int main(void)
 
 	/* Read agian from the register */
 
-	ret_debug_handle = Read_5_Bytes(TX_ADDR, &return_val[0]);
+	ret_debug_handle = Read_5_Bytes(SPI0, TX_ADDR, &return_val[0]);
 	for(cntr=0; cntr<5; cntr++){
 		out[cntr] = return_val[cntr];
 	}
-	MY_LOG_PARAMS("Read Operation Output: ", out[0]);
-	MY_LOG("\n");
+	//MY_LOG_PARAMS("Read Operation Output: ", out[0]);
+	//MY_LOG("\n");
 
-#if READ_PRINT_SINGLE_BYTE
+#ifdef READ_PRINT_SINGLE_BYTE
 	/*Change config to write*/
-	reg_addr = R_REGISTER | CONFIG;
-
-	ret_debug_handle = Read_from_nRF_Register(&reg_addr, &return_val);
-	out = return_val;
-	MY_LOG_PARAMS("Read Operation Output(post write): ", out);
-	MY_LOG("\n");
+	uint8_t reg_addr = CONFIG;
+        uint8_t return_value = 0;
+	ret_debug_handle = Read_from_nRF_Register(SPI0, reg_addr, &return_value);
+	//MY_LOG_PARAMS("Read Operation Output(post write): ", out);
+	//MY_LOG("\n");
+        delay(10);
 #endif
 
 #endif
@@ -276,7 +265,7 @@ int main(void)
 	debug dma_ret_handle;
 
 	/*Initialize the counter*/
-	dma_ret_handle = my_memmove_dma_64( src, dst, len);
+	dma_ret_handle = my_memmove_dma( src, dst, len);
 	#ifdef DEBUG
 		handle_errors(dma_ret_handle);
 	#endif
