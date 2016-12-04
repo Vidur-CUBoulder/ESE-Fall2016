@@ -20,8 +20,34 @@ typedef enum errors_t {
 	nRF_READ_SUCCESSFUL,
 	nRF_READ_FAILURE,
         nRF_SETUP_SUCCESSFUL,
-        PAYLOAD_READ_SUCCESSFUL
+        PAYLOAD_READ_SUCCESSFUL,
+        PTX_CONFIG_SUCCESSFUL,
+        PRX_CONFIG_SUCCESSFUL,
+
 } errors;
+
+typedef struct nRF_Values_t {
+    void *spi_number;
+    uint8_t set_RF_CH;
+    uint8_t set_RX_PW_P1; 
+    uint8_t set_RF_SETUP; 
+    uint8_t set_CONFIG; 
+    uint8_t set_EN_AA; 
+    uint8_t set_EN_RXADDR; 
+    uint8_t set_SETUP_RETR; 
+    uint8_t set_DYNPD; 
+    uint8_t set_STATUS;
+    uint8_t set_RX_ADDR_P0[5];
+    uint8_t set_TX_ADDR[5];
+    uint8_t set_RX_ADDR_P1[5];
+} nRF_Values;
+
+
+typedef struct nRF_Devices_t {
+    errors (*PTX)(nRF_Values );
+    errors (*PRX)(nRF_Values );
+
+} nRF_Cluster;
 
 #define RESET_nRF_Modules() reset_all_registers(SPI1);\
                             reset_all_registers(SPI0)
@@ -36,8 +62,6 @@ typedef enum errors_t {
  */
 uint8_t Send_Read_Write_Command(void *spi, uint8_t *cmd);
 
-uint8_t Send_Read_Write_Command_SPI1(uint8_t *cmd);
-
 /*Function: Send_Write_Value(uint8_t write_value)
  * Parameters: value that has to be written to the nRF register.
  * Return: Value that is returned via MISO to the Master Device.
@@ -46,8 +70,6 @@ uint8_t Send_Read_Write_Command_SPI1(uint8_t *cmd);
  * Failure to do this will result in an unexpected behavior.
  */
 uint8_t Send_Write_Value(void *spi, uint8_t write_value);
-
-uint8_t Send_Write_Value_SPI1(uint8_t write_value);
 
 /*Function: Write_to_nRF(int8_t reg_value, reg_map reg);
  * Parameters: 
@@ -86,19 +108,12 @@ void Flush_TX(void *spi);
 
 uint8_t Abs_Write_5B_to_nRF_Register(void *spi, reg_map reg, uint8_t *value);
 
-uint8_t Abs_Write_5B_to_nRF_Register_SPI1(reg_map reg, uint8_t *value);
-
-void loop();
-
-void reset_all_registers_SPI1(void);
-
 void reset_all_registers(void *spi);
 
 void Setup_PTX_Device();
 
 void Setup_PRX_Device();
 
-void Dump_SPI1_Reg(void);
 void Dump_Reg(void *spi);
 
 
@@ -108,11 +123,15 @@ void set_device_addr(void);
 
 void Setup_TX(void);
 
-void config_tx_addr();
-void config_rx_addr();
+void config_tx_addr(nRF_Values config_data);
+void config_rx_addr(nRF_Values config_data);
 
 void fill_tx_buffer(uint8_t *data);
 
-void nrf_Config_PTX_PRX();
+errors nrf_Config_PTX(nRF_Values config_data);
+
+errors nrf_Config_PRX(nRF_Values config_data);
+
+nRF_Cluster *Alloc_nRF_Cluster();
 
 #endif /* INCLUDES_NRF_H_ */

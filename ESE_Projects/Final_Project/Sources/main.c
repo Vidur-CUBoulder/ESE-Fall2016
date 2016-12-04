@@ -36,9 +36,38 @@
 //#define temp_sensor
 //#define SPI0_Rx_nRF_Comm
 //#define EEPROM
+#define Final_Program
+//#define Final_EEPROM
+
 
 int main(void)
 {
+
+
+#ifdef Final_Program
+
+    nRF_Cluster *new_cluster = NULL;
+
+    spi_0_init();
+    spi_1_init();
+
+    nRF_Values PTX_Config_Data = {SPI0, 76, 4, 0x06, 0x08, 0x03, 0x03, 0x4F, 0x00, 0x70,{0xe7, 0xe7, 0xe7, 0xe7, 0xe7 },\
+                                {0xe7, 0xe7, 0xe7, 0xe7, 0xe7}, {0xd7, 0xd7, 0xd7, 0xd7, 0xd7} };  
+    nRF_Values PRX_Config_Data = {SPI1, 76, 4, 0x06, 0x08, 0x03, 0x03, 0x4F, 0x00, 0x70,{0xe7, 0xe7, 0xe7, 0xe7, 0xe7 },\
+                                {0xe7, 0xe7, 0xe7, 0xe7, 0xe7}, {0xd7, 0xd7, 0xd7, 0xd7, 0xd7} };
+
+    new_cluster = Alloc_nRF_Cluster();
+
+    new_cluster->PTX(PTX_Config_Data);
+    new_cluster->PRX(PRX_Config_Data);
+
+    free(new_cluster);
+
+
+
+
+#endif
+
 
 #ifdef EEPROM
     uint8_t out = 0;
@@ -49,13 +78,13 @@ int main(void)
     Read_Status(&read_status_value);
 
     //Enable_Write_Latch();
-    //Disable_Write_Latch();
+    Disable_Write_Latch();
 
-    uint8_t address = 0x00;
-    //uint8_t data_ret = 0;
+    uint8_t address = 0x05;
+    uint8_t data_ret = 0;
 
-    //Write_Data_to_EEPROM(10, &address);
-    //Read_Data_from_EEPROM(&address, &data_ret);
+    Write_Data_to_EEPROM(12, &address);
+    Read_Data_from_EEPROM(&address, &data_ret);
 
     uint8_t data[4] = {0};
     uint8_t write_data[4] = {0xAC, 0x48, 0xBA, 0xCD};

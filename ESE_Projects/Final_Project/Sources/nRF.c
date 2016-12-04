@@ -221,7 +221,7 @@ uint8_t Send_Write_Value(void *spi, uint8_t write_value)
     uint8_t ret_value = 0;
     if(spi == SPI0) {
         //while(WAIT_FOR_SPTEF(spi));
-        while(WAIT_FOR_SPTEF(spi));
+        while(WAIT_FOR_SPTEF_SPI0);
         SPI_D_REG(SPI0) = write_value;
         while(WAIT_FOR_SPRF_SPI0);
         ret_value = SPI_D_REG(SPI0);
@@ -282,7 +282,16 @@ uint8_t Abs_Write_5B_to_nRF_Register(void *spi, reg_map reg, uint8_t *value)
 
 }
 
-void nrf_Config_PTX_PRX()
+nRF_Cluster *Alloc_nRF_Cluster()
+{
+    nRF_Cluster *cluster = malloc(sizeof(nRF_Cluster));
+    cluster->PTX = &nrf_Config_PTX;
+    cluster->PRX = &nrf_Config_PRX;
+
+    return cluster;
+}
+
+errors nrf_Config_PRX(nRF_Values config_data)
 {
 
     /*  Config Information:->
@@ -297,82 +306,147 @@ void nrf_Config_PTX_PRX()
      */
 
     /* RF_CH */
-    Abs_Write_to_nRF_Register(SPI0, RF_CH, 76);
-    Abs_Write_to_nRF_Register(SPI1, RF_CH, 76);
+    Abs_Write_to_nRF_Register(config_data.spi_number, RF_CH,\
+                                config_data.set_RF_CH);
 
     /* RX_PW_P1 */
-    Abs_Write_to_nRF_Register(SPI0, RX_PW_P1, 4);
-    Abs_Write_to_nRF_Register(SPI1, RX_PW_P1, 4);
-
+    Abs_Write_to_nRF_Register(config_data.spi_number, RX_PW_P1,\ 
+                                config_data.set_RX_PW_P1);
+    
     /* RF_SETUP */
-    Abs_Write_to_nRF_Register(SPI0, RF_SETUP, 0x06);
-    Abs_Write_to_nRF_Register(SPI1, RF_SETUP, 0x06);
+    Abs_Write_to_nRF_Register(config_data.spi_number, RF_SETUP,\
+                                config_data.set_RF_SETUP);
 
     /* CONFIG --> CRC en and 1B CRC len */
-    Abs_Write_to_nRF_Register(SPI0, CONFIG, 0x08);
-    Abs_Write_to_nRF_Register(SPI1, CONFIG, 0x08);
-   
+    Abs_Write_to_nRF_Register(config_data.spi_number, CONFIG,\
+                                config_data.set_CONFIG);
+
     /* EN_AA --> pipes 0 and 1 */
-    Abs_Write_to_nRF_Register(SPI0, EN_AA, 0x03);
-    Abs_Write_to_nRF_Register(SPI1, EN_AA, 0x03);
+    Abs_Write_to_nRF_Register(config_data.spi_number, EN_AA,\
+                                config_data.set_EN_AA);
 
     /* EN_RXADDR */
-    Abs_Write_to_nRF_Register(SPI0, EN_RXADDR, 0x03);
-    Abs_Write_to_nRF_Register(SPI1, EN_RXADDR, 0x03);
+    Abs_Write_to_nRF_Register(config_data.spi_number, EN_RXADDR,\
+                                config_data.set_EN_RXADDR);
 
     /* SETUP_RETR */
-    Abs_Write_to_nRF_Register(SPI0, SETUP_RETR, 0x4F);
-    Abs_Write_to_nRF_Register(SPI1, SETUP_RETR, 0x4F);
-
-    /* Disable DYNPD */
-    Abs_Write_to_nRF_Register(SPI0, DYNPD, 0x00);
-    Abs_Write_to_nRF_Register(SPI1, DYNPD, 0x00);
+    Abs_Write_to_nRF_Register(config_data.spi_number, SETUP_RETR,\
+                                config_data.set_SETUP_RETR);
     
+    /* Disable DYNPD */
+    Abs_Write_to_nRF_Register(config_data.spi_number, DYNPD,\
+                                config_data.set_DYNPD);
+
     /* Flush the TX and RX for the PTX */
-    Flush_RX(SPI0);
-    Flush_RX(SPI1);
-    Flush_TX(SPI0);
-    Flush_TX(SPI1);
+    Flush_RX(config_data.spi_number);
+    Flush_TX(config_data.spi_number);
 
     /* Next, clear the bits of the STATUS register */
-    Write_to_nRF_Register(SPI0, STATUS, 0x70);
-    Write_to_nRF_Register(SPI1, STATUS, 0x70);
+    Write_to_nRF_Register(config_data.spi_number, STATUS,\
+                                config_data.set_STATUS);
+
+    /* Do the address configuration now! */
+    config_rx_addr(config_data);
+
+    return PRX_CONFIG_SUCCESSFUL;
 
 }
 
-void config_tx_addr()
+errors nrf_Config_PTX(nRF_Values config_data)
 {
-    // First the TX addr.
+
+    /*  Config Information:->
+     *  RF_CH : Channel : 2 
+     *  RX_PW_P1 : Payload_Length: 4
+     *  RF_SETUP : 1Mbps, TX gain: 0db
+     *  CONFIG :  CRC enabled, 1B CRC length
+     *  EN_AA : pipes 0 and 1
+     *  EN_RXADDR : again pipes 0 and 1
+     *  SETUP_RETR : 1000us and 15 re-trans trials
+     *  disable DYNPD completely
+     */
+
+    /* RF_CH */
+    Abs_Write_to_nRF_Register(config_data.spi_number, RF_CH,\
+                                config_data.set_RF_CH);
+    /* RX_PW_P1 */
+    Abs_Write_to_nRF_Register(config_data.spi_number, RX_PW_P1,\
+                                config_data.set_RX_PW_P1);
+
+    /* RF_SETUP */
+    Abs_Write_to_nRF_Register(config_data.spi_number, RF_SETUP,\
+                                config_data.set_RF_SETUP);
+
+    /* CONFIG --> CRC en and 1B CRC len */
+    Abs_Write_to_nRF_Register(config_data.spi_number, CONFIG,\
+                                config_data.set_CONFIG);
+   
+    /* EN_AA --> pipes 0 and 1 */
+    Abs_Write_to_nRF_Register(config_data.spi_number, EN_AA,\
+                                config_data.set_EN_AA);
+
+    /* EN_RXADDR */
+    Abs_Write_to_nRF_Register(config_data.spi_number, EN_RXADDR,\
+                                config_data.set_EN_RXADDR);
+
+    /* SETUP_RETR */
+    Abs_Write_to_nRF_Register(config_data.spi_number, SETUP_RETR,\
+                                config_data.set_SETUP_RETR);
+
+    /* Disable DYNPD */
+    Abs_Write_to_nRF_Register(config_data.spi_number, DYNPD,\
+                                config_data.set_DYNPD);
     
+    /* Flush the TX and RX for the PTX */
+    Flush_RX(config_data.spi_number);
+    Flush_TX(config_data.spi_number);
+
+    /* Next, clear the bits of the STATUS register */
+    Write_to_nRF_Register(config_data.spi_number, STATUS,\
+                                config_data.set_STATUS);
+
+    /* Do the address configuration now! */
+    config_tx_addr(config_data);
+
+    return PTX_CONFIG_SUCCESSFUL;
+}
+
+void config_tx_addr(nRF_Values config_data)
+{
     /* RX_ADDR_P0 must be set to the sending address for the auto ack to work! */
     uint8_t ret_value[5] = {0};
-    uint8_t rx_addr_val[] = { 0xe7, 0xe7, 0xe7, 0xe7, 0xe7 };
+    //uint8_t rx_addr_val[] = { 0xe7, 0xe7, 0xe7, 0xe7, 0xe7 };
 
-    Abs_Write_5B_to_nRF_Register(SPI0, RX_ADDR_P0, &rx_addr_val[0]);
-    Read_5_Bytes(SPI0, RX_ADDR_P0, &ret_value[0]);
+    Abs_Write_5B_to_nRF_Register(config_data.spi_number, RX_ADDR_P0,\
+                                    &config_data.set_RX_ADDR_P0[0]);
+    Read_5_Bytes(config_data.spi_number, RX_ADDR_P0,\
+                                    &ret_value[0]);
     
-    Abs_Write_5B_to_nRF_Register(SPI0, TX_ADDR, &rx_addr_val[0]);
-    Read_5_Bytes(SPI0, TX_ADDR, &ret_value[0]);
+    Abs_Write_5B_to_nRF_Register(config_data.spi_number, TX_ADDR,\
+                                    &config_data.set_TX_ADDR[0]);
+    Read_5_Bytes(config_data.spi_number, TX_ADDR,\
+                                    &ret_value[0]);
 
-    uint8_t value_1[5] = {0xd7, 0xd7, 0xd7, 0xd7, 0xd7};
-    Abs_Write_5B_to_nRF_Register(SPI0, RX_ADDR_P1, &value_1[0]);
+    //uint8_t value_1[5] = {0xd7, 0xd7, 0xd7, 0xd7, 0xd7};
+    Abs_Write_5B_to_nRF_Register(config_data.spi_number, RX_ADDR_P1,\
+                                    &config_data.set_RX_ADDR_P1[0]);
     Read_5_Bytes(SPI0, RX_ADDR_P1, &ret_value[0]);
     
 }
 
-void config_rx_addr()
+void config_rx_addr(nRF_Values config_data)
 {
     uint8_t ret_value[5] = {0};
-    uint8_t rx_addr_val[] = { 0xd7, 0xd7, 0xd7, 0xd7, 0xd7 };
+    //uint8_t rx_addr_val[] = { 0xd7, 0xd7, 0xd7, 0xd7, 0xd7 };
 
-    Abs_Write_5B_to_nRF_Register(SPI1, RX_ADDR_P0, &rx_addr_val[0]);
+    Abs_Write_5B_to_nRF_Register(config_data.spi_number, RX_ADDR_P0, &config_data.set_RX_ADDR_P0[0]);
     Read_5_Bytes(SPI1, RX_ADDR_P0, &ret_value[0]);
     
-    Abs_Write_5B_to_nRF_Register(SPI1, TX_ADDR, &rx_addr_val[0]);
+    Abs_Write_5B_to_nRF_Register(config_data.spi_number, TX_ADDR, &config_data.set_TX_ADDR[0]);
     Read_5_Bytes(SPI1, TX_ADDR, &ret_value[0]);
 
-    uint8_t value_1[5] = {0xe7, 0xe7, 0xe7, 0xe7, 0xe7};
-    Abs_Write_5B_to_nRF_Register(SPI1, RX_ADDR_P1, &value_1[0]);
+    //uint8_t value_1[5] = {0xe7, 0xe7, 0xe7, 0xe7, 0xe7};
+    Abs_Write_5B_to_nRF_Register(config_data.spi_number, RX_ADDR_P1, &config_data.set_RX_ADDR_P1[0]);
     Read_5_Bytes(SPI1, RX_ADDR_P1, &ret_value[0]);
 }
 
@@ -400,6 +474,7 @@ void fill_tx_buffer(uint8_t *data)
 
 }
 
+#if 0
 errors Setup_nRF(void)
 {
     uint8_t reg_value = 0;
@@ -454,6 +529,6 @@ errors Read_Rx_Payload(uint8_t length, uint8_t *data)
     return PAYLOAD_READ_SUCCESSFUL; 
 }
 
-
+#endif
 
 

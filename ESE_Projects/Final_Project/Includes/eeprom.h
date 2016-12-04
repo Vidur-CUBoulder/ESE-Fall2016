@@ -60,6 +60,15 @@ typedef enum eeprom_instrctions_t {
     WRITE       =  0x02
 } eeprom_instructions;
 
+
+void Init_SPI1_EEPROM(void);
+
+uint8_t SPI_Read_Write_Ops(uint8_t cmd);
+
+uint8_t Read_Status_Reg(void);
+
+
+
 /*Function: Send_EEPROM_Read_Write(uint8_t cmd)
  * Parameters: take the input command that has to be passed to the 
  *             EEPROM. This can either be the opcode or any data that
@@ -68,7 +77,7 @@ typedef enum eeprom_instrctions_t {
  *         EEPROM IC.
  * Description: Function to read/write values to the eeprom.
  */
-uint8_t Send_EEPROM_Read_Write(uint8_t cmd);
+uint8_t Send_EEPROM_Read_Write(eeprom_instructions cmd);
 
 /*Function: Read_Status(uint8_t *read_status_value)
  * Parameters: var. in which you want to store the read value.

@@ -34,14 +34,13 @@ void spi_1_init(void)
 	GPIO_PDDR_REG(GPIOD) = (CONFIG_PORTD4_DIR_OUT | CONFIG_PORTD3_DIR_OUT);
 
 	/* Config the Baud Rate for SPI1 comm. */
-	SPI_BR_REG(SPI1) = /*SPI1_BAUD_RATE*/0x10;
+	SPI_BR_REG(SPI1) = /*SPI1_BAUD_RATE*/0x00;
 
-	/*Config the C1 SPI1 register as master connection */
-	SPI_C1_REG(SPI1) = SPI_C1_CONFIG;
+        /*Config the C1 SPI1 register as master connection */
+        SPI_C1_REG(SPI1) = SPI_C1_CONFIG;
 
         /* Pull the CS High Now! */
         Pull_CS_High(SPI1);
-        //Pull_CS_High_SPI1();
 }
 
 /* Config. as master */
@@ -213,7 +212,7 @@ uint8_t Abs_Write_to_nRF_Register(void *spi, reg_map reg, uint8_t write_value)
 	uint8_t return_nRF_value = 0;
         uint8_t final_write_value = 0;
         uint8_t reg_addr = 0;
-    
+
         reg_addr = W_REGISTER | reg;
         
 	Pull_CS_Low(spi);
