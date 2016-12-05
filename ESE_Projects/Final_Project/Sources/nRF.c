@@ -19,68 +19,7 @@
 
 }*/
 
-
-/*
-void reset_all_registers_SPI1(void)
-{
-    Abs_Write_to_nRF_Register(SPI1, CONFIG, 0x80);
-    Abs_Write_to_nRF_Register(SPI1, EN_AA, 0x3F);
-    Abs_Write_to_nRF_Register(SPI1, EN_RXADDR, 0x03);
-    Abs_Write_to_nRF_Register(SPI1, SETUP_AW, 0x03);
-    Abs_Write_to_nRF_Register(SPI1, SETUP_RETR, 0x03);
-    Abs_Write_to_nRF_Register(SPI1, RF_CH, 0x02);
-    Abs_Write_to_nRF_Register(SPI1, RF_SETUP, 0x0E);
-    Abs_Write_to_nRF_Register(SPI1, STATUS, 0x7E);
-
-    uint8_t value[5] = {0xe7, 0xe7, 0xe7, 0xe7, 0xe7};
-    Abs_Write_5B_to_nRF_Register(SPI1, RX_ADDR_P0, &value[0]);
-
-    uint8_t value_1[5] = {0xc2, 0xc2, 0xc2, 0xc2, 0xc2};
-    Abs_Write_5B_to_nRF_Register(SPI1, RX_ADDR_P1, &value_1[0]);
-
-    uint8_t value_tx[5] = {0xe7, 0xe7, 0xe7, 0xe7, 0xe7};
-    Abs_Write_5B_to_nRF_Register(SPI1, TX_ADDR, &value_tx[0]);
-
-    Abs_Write_to_nRF_Register(SPI1, RX_PW_P0, 0x00);
-    Abs_Write_to_nRF_Register(SPI1, RX_PW_P1, 0x00);
-
-    //Read all in order to validate
-    //Dump_SPI1_Reg();
-}
-*/
-
-/*
-void Dump_SPI1_Reg(void)
-{
-    uint8_t reg_value = 0;
-    uint8_t ret_value[5] = {0};
-
-    Read_from_nRF_Register(SPI1, STATUS, &reg_value);
-    Read_from_nRF_Register(SPI1, OBSERVE_TX, &reg_value);
-    Read_from_nRF_Register(SPI1, FIFO_STATUS, &reg_value);
-    Read_from_nRF_Register(SPI1, CONFIG, &reg_value);
-    Read_from_nRF_Register(SPI1, EN_AA, &reg_value);
-    Read_from_nRF_Register(SPI1, EN_RXADDR, &reg_value);
-    Read_from_nRF_Register(SPI1, SETUP_AW, &reg_value);
-    Read_from_nRF_Register(SPI1, SETUP_RETR, &reg_value);
-    Read_from_nRF_Register(SPI1, RF_CH, &reg_value);
-    Read_from_nRF_Register(SPI1, RF_SETUP, &reg_value);
-    Read_from_nRF_Register(SPI1, DYNPD, &reg_value);
-
-    Read_5_Bytes(SPI1, RX_ADDR_P0, &ret_value[0]);
-    Read_5_Bytes(SPI1, RX_ADDR_P1, &ret_value[0]);
-    Read_5_Bytes(SPI1, TX_ADDR, &ret_value[0]);
-
-    Read_from_nRF_Register(SPI1, RX_PW_P0, &reg_value);
-    Read_from_nRF_Register(SPI1, RX_PW_P1, &reg_value);
-    Read_from_nRF_Register(SPI1, RX_PW_P2, &reg_value);
-    Read_from_nRF_Register(SPI1, RX_PW_P3, &reg_value);
-    Read_from_nRF_Register(SPI1, RX_PW_P4, &reg_value);
-    Read_from_nRF_Register(SPI1, RX_PW_P5, &reg_value);
-}
-*/
-
-void reset_all_registers(void *spi)
+errors reset_all_registers(void *spi)
 {
     Abs_Write_to_nRF_Register(spi, CONFIG, 0x80);
     Abs_Write_to_nRF_Register(spi, EN_AA, 0x3F);
@@ -108,7 +47,7 @@ void reset_all_registers(void *spi)
 
 }
 
-void Dump_Reg(void *spi)
+errors Dump_Reg(void *spi)
 {
     uint8_t reg_value = 0;
     uint8_t ret_value[5] = {0};
@@ -137,19 +76,6 @@ void Dump_Reg(void *spi)
     Read_from_nRF_Register(spi, RX_PW_P5, &reg_value);
 }
 
-/*
-void Flush_TX_SPI1(void)
-{
-    Pull_CS_Low(SPI1);
-   
-    uint8_t cmd = FLUSH_TX;
-    Send_Read_Write_Command_SPI1(&cmd);
-    delay(10);
-    
-    Pull_CS_High(SPI1);
-}
-*/
-
 void Flush_TX(void *spi)
 {
     Pull_CS_Low(spi);
@@ -172,19 +98,6 @@ void Flush_RX(void *spi)
     Pull_CS_High(spi);
 }
 
-/*
-void Flush_RX_SPI1(void)
-{
-    Pull_CS_Low(SPI1);
-    
-    uint8_t cmd = FLUSH_RX;
-    Send_Read_Write_Command_SPI1(&cmd);
-    delay(10);
-    
-    Pull_CS_High(SPI1);
-}
-*/
-
 uint8_t Send_Read_Write_Command(void *spi, uint8_t *cmd)
 {
     uint8_t ret_value = 0;
@@ -203,27 +116,14 @@ uint8_t Send_Read_Write_Command(void *spi, uint8_t *cmd)
 
     return ret_value;
 }
-/*
-uint8_t Send_Read_Write_Command_SPI1(uint8_t *cmd)
-{
-    uint8_t ret_value = 0;
 
-    while(WAIT_FOR_SPTEF(SPI1));
-    SPI1->D = *cmd;
-    while(WAIT_FOR_SPRF(SPI1));
-    ret_value = SPI1->D;
-
-    return ret_value;
-}
-*/
 uint8_t Send_Write_Value(void *spi, uint8_t write_value)
 {
     uint8_t ret_value = 0;
     if(spi == SPI0) {
-        //while(WAIT_FOR_SPTEF(spi));
-        while(WAIT_FOR_SPTEF_SPI0);
+        while(WAIT_FOR_SPTEF(spi));
         SPI_D_REG(SPI0) = write_value;
-        while(WAIT_FOR_SPRF_SPI0);
+        while(WAIT_FOR_SPRF(spi));
         ret_value = SPI_D_REG(SPI0);
     } else {
         while(WAIT_FOR_SPTEF(spi));
@@ -233,31 +133,6 @@ uint8_t Send_Write_Value(void *spi, uint8_t write_value)
     }
 	return ret_value;
 }
-
-/*
-uint8_t Abs_Write_5B_to_nRF_Register_SPI1(reg_map reg, uint8_t *value)
-{
-    uint8_t *temp_value = value; 
-    uint8_t reg_addr = 0;
-    uint8_t len = 5;
-
-    reg_addr = W_REGISTER | reg;
-
-    Pull_CS_Low(SPI1);
-    Send_Read_Write_Command_SPI1(&reg_addr);
-
-    delay(10);
-
-    while(len) {
-        Send_Read_Write_Command_SPI1(temp_value++);
-        len--;
-    }
-    Pull_CS_High(SPI1);
-
-    return 0;
-
-}
-*/
 
 uint8_t Abs_Write_5B_to_nRF_Register(void *spi, reg_map reg, uint8_t *value)
 {
@@ -285,8 +160,13 @@ uint8_t Abs_Write_5B_to_nRF_Register(void *spi, reg_map reg, uint8_t *value)
 nRF_Cluster *Alloc_nRF_Cluster()
 {
     nRF_Cluster *cluster = malloc(sizeof(nRF_Cluster));
-    cluster->PTX = &nrf_Config_PTX;
-    cluster->PRX = &nrf_Config_PRX;
+    
+    cluster->Reset_Module = &reset_all_registers;
+    cluster->Dump_Register_Values = &Dump_Reg;
+    cluster->Config_Modules = &nrf_Config_PTX;
+    cluster->fill_buffer = &fill_nRF_buffer;
+    cluster->Activate_Modules = &Turn_On_Modules;
+    cluster->Read_Payload_Buffer = &Read_RX_Payload;
 
     return cluster;
 }
@@ -310,7 +190,7 @@ errors nrf_Config_PRX(nRF_Values config_data)
                                 config_data.set_RF_CH);
 
     /* RX_PW_P1 */
-    Abs_Write_to_nRF_Register(config_data.spi_number, RX_PW_P1,\ 
+    Abs_Write_to_nRF_Register(config_data.spi_number, RX_PW_P1,\
                                 config_data.set_RX_PW_P1);
     
     /* RF_SETUP */
@@ -337,7 +217,7 @@ errors nrf_Config_PRX(nRF_Values config_data)
     Abs_Write_to_nRF_Register(config_data.spi_number, DYNPD,\
                                 config_data.set_DYNPD);
 
-    /* Flush the TX and RX for the PTX */
+    /* Flush the TX and RX for the PRX */
     Flush_RX(config_data.spi_number);
     Flush_TX(config_data.spi_number);
 
@@ -450,85 +330,88 @@ void config_rx_addr(nRF_Values config_data)
     Read_5_Bytes(SPI1, RX_ADDR_P1, &ret_value[0]);
 }
 
-void fill_tx_buffer(uint8_t *data)
+errors fill_nRF_buffer(void *spi, uint8_t *data, uint8_t length)
 {
     //Write to the TX payload!
      
-    Pull_CS_Low(SPI0);
+    Pull_CS_Low(spi);
     
     uint8_t cmd = W_TX_PAYLOAD;
-    Send_Read_Write_Command(SPI0, &cmd);
+    Send_Read_Write_Command(spi, &cmd);
     
     delay(10);
 
-    //Now start pushing the data into the payload buffer!
-    uint8_t i = 0;
-    uint8_t len = 4;
-    while(len) {
-        Send_Write_Value(SPI0, *(data++));
-        i++;
-        len--;
+    //Now start pushing the data into the payload buffer
+    //uint8_t len = 4;
+    while(length) {
+        Send_Write_Value(spi, *(data++));
+        length--;
     }
     
-    Pull_CS_High(SPI0);
+    Pull_CS_High(spi);
 
+    return BUFFER_FILLED;
 }
 
-#if 0
-errors Setup_nRF(void)
+errors Turn_On_Modules(void *SPI_RX/*SPI1*/, void *SPI_TX/*SPI0*/)
 {
+    /* Write to the CONFIG register to reset the interrupts
+     * and to config the TX/RX modules accordingly
+     */
     uint8_t reg_value = 0;
-   
-    //Disable the Chip Enable pins on both modules. 
-    CE_Low(SPI1);
-    CE_Low(SPI0);
-
-    /* Make the CS pins on both modules high to prevent
-     * inadvertent SPI read/writes.
-     */
-    Pull_CS_High(SPI1);
-    Pull_CS_High(SPI0);
-
-    RESET_nRF_Modules();
-
-    nrf_Config_PTX_PRX();
-    config_tx_addr();
-    config_rx_addr();
-    //fill_tx_buffer(&data[0]);
     
-    /* Reset the interrupt bits in the CONFIG reg. 
-     * in both TX and RX modules
-     */
-    Write_to_nRF_Register(SPI1, CONFIG, 0x03); //PRX
-    Read_from_nRF_Register(SPI1, CONFIG, &reg_value);
+    Write_to_nRF_Register(SPI_RX, CONFIG, 0x03); //PRX
+    Read_from_nRF_Register(SPI_RX, CONFIG, &reg_value);
     
-    Write_to_nRF_Register(SPI0, CONFIG, 0x02); //PTX
-    Read_from_nRF_Register(SPI0, CONFIG, &reg_value);
+    Write_to_nRF_Register(SPI_TX, CONFIG, 0x02); //PTX
+    Read_from_nRF_Register(SPI_TX, CONFIG, &reg_value);
 
-    return nRF_SETUP_SUCCESSFUL; 
+    /* Prevent any other SPI operations */
+    Pull_CS_High(SPI_RX);
+    Pull_CS_High(SPI_TX);
+
+    /* Launch!! */
+    CE_High(SPI_RX);
+    CE_High(SPI_TX);
+
+    return nRF_MODULES_ON;
 }
 
-errors Read_Rx_Payload(uint8_t length, uint8_t *data)
+errors Turn_Off_Modules(void *SPI_RX/*SPI1*/, void *SPI_TX/*SPI0*/)
 {
-    Pull_CS_Low(SPI1);
+
+    if(SPI_RX == NULL || SPI_TX == NULL) {
+        return NULL_FAILURE;
+    }
+
+    /* Just disable the Chip Select */ 
+    CE_Low(SPI_RX);
+    CE_Low(SPI_TX);
+
+    return nRF_MODULES_OFF;
+
+}
+
+errors Read_RX_Payload(void *spi, uint8_t *read_data, uint8_t len)
+{
+    Pull_CS_Low(spi);
     
     uint8_t cmd = R_RX_PAYLOAD;
-    Send_Read_Write_Command(SPI1, &cmd);
+    Send_Read_Write_Command(spi, &cmd);
     
     delay(10);
    
     cmd = NOP;
-    
-    while(length) {
-        *(data++) = Send_Read_Write_Command(SPI1, &cmd);
-        length--;
+    //uint8_t data_1[4] = {0};
+    //uint8_t len = 4;
+    while(len) {
+        *(read_data++) = Send_Read_Write_Command(spi, &cmd);
+        len--;
     }
 
-    Pull_CS_High(SPI1);
-    
-    return PAYLOAD_READ_SUCCESSFUL; 
+    Pull_CS_High(spi);
+
 }
 
-#endif
 
 

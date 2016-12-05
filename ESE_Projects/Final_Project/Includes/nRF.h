@@ -23,6 +23,10 @@ typedef enum errors_t {
         PAYLOAD_READ_SUCCESSFUL,
         PTX_CONFIG_SUCCESSFUL,
         PRX_CONFIG_SUCCESSFUL,
+        BUFFER_FILLED,
+        nRF_MODULES_ON,
+        nRF_MODULES_OFF
+
 
 } errors;
 
@@ -44,8 +48,13 @@ typedef struct nRF_Values_t {
 
 
 typedef struct nRF_Devices_t {
-    errors (*PTX)(nRF_Values );
-    errors (*PRX)(nRF_Values );
+
+    errors (*Reset_Module)(void *);
+    errors (*Dump_Register_Values)(void *);
+    errors (*Config_Modules)(nRF_Values );
+    errors (*fill_buffer)(void *, uint8_t *, uint8_t );
+    errors (*Activate_Modules)(void *, void *);
+    errors (*Read_Payload_Buffer)(void *, uint8_t *, uint8_t );
 
 } nRF_Cluster;
 
@@ -108,13 +117,12 @@ void Flush_TX(void *spi);
 
 uint8_t Abs_Write_5B_to_nRF_Register(void *spi, reg_map reg, uint8_t *value);
 
-void reset_all_registers(void *spi);
+errors reset_all_registers(void *spi);
 
 void Setup_PTX_Device();
 
 void Setup_PRX_Device();
 
-void Dump_Reg(void *spi);
 
 
 void setup_common_nRF_char(void);
@@ -123,15 +131,30 @@ void set_device_addr(void);
 
 void Setup_TX(void);
 
-void config_tx_addr(nRF_Values config_data);
-void config_rx_addr(nRF_Values config_data);
+//void config_tx_addr(nRF_Values config_data);
+//void config_rx_addr(nRF_Values config_data);
 
-void fill_tx_buffer(uint8_t *data);
+errors fill_nRF_buffer(void *spi, uint8_t *data, uint8_t length);
 
 errors nrf_Config_PTX(nRF_Values config_data);
 
 errors nrf_Config_PRX(nRF_Values config_data);
 
 nRF_Cluster *Alloc_nRF_Cluster();
+
+errors Turn_On_Modules(void *SPI_RX/*SPI1*/, void *SPI_TX/*SPI0*/);
+
+errors Turn_Off_Modules(void *SPI_RX/*SPI1*/, void *SPI_TX/*SPI0*/);
+
+errors Read_RX_Payload(void *spi, uint8_t *read_data, uint8_t len);
+
+errors Dump_Reg(void *spi);
+
+/* Testing functions */
+void nrf_Config_PTX_PRX();
+void config_tx_addr();
+void config_rx_addr();
+void fill_tx_buffer(uint8_t *data);
+
 
 #endif /* INCLUDES_NRF_H_ */

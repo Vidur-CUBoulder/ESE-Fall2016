@@ -34,7 +34,7 @@ void spi_1_init(void)
 	GPIO_PDDR_REG(GPIOD) = (CONFIG_PORTD4_DIR_OUT | CONFIG_PORTD3_DIR_OUT);
 
 	/* Config the Baud Rate for SPI1 comm. */
-	SPI_BR_REG(SPI1) = /*SPI1_BAUD_RATE*/0x00;
+	SPI_BR_REG(SPI1) = SPI1_BAUD_RATE/*0x36*/;
 
         /*Config the C1 SPI1 register as master connection */
         SPI_C1_REG(SPI1) = SPI_C1_CONFIG;

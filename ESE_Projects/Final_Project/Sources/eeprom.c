@@ -86,9 +86,7 @@ uint8_t Send_EEPROM_Read_Write(eeprom_instructions cmd)
 {
     uint8_t ret_value = 0;
 
-    delay(10);
     while(WAIT_FOR_SPTEF_SPI1);
-    delay(5);
     SPI1->D = cmd;
     while(WAIT_FOR_SPRF_SPI1);
     ret_value = SPI1->D;
@@ -111,7 +109,6 @@ eeprom_errors Read_Status(uint8_t *read_status_value)
     Pull_CS_Low(SPI1);
     
     Send_EEPROM_Read_Write(RDSR);
-    delay(20);
     *read_status_value = Send_EEPROM_Read_Write(0xFF);
 
     //Pull the CS high!

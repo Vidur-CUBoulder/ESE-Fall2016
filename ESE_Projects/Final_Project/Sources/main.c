@@ -53,18 +53,48 @@ int main(void)
 
     nRF_Values PTX_Config_Data = {SPI0, 76, 4, 0x06, 0x08, 0x03, 0x03, 0x4F, 0x00, 0x70,{0xe7, 0xe7, 0xe7, 0xe7, 0xe7 },\
                                 {0xe7, 0xe7, 0xe7, 0xe7, 0xe7}, {0xd7, 0xd7, 0xd7, 0xd7, 0xd7} };  
-    nRF_Values PRX_Config_Data = {SPI1, 76, 4, 0x06, 0x08, 0x03, 0x03, 0x4F, 0x00, 0x70,{0xe7, 0xe7, 0xe7, 0xe7, 0xe7 },\
-                                {0xe7, 0xe7, 0xe7, 0xe7, 0xe7}, {0xd7, 0xd7, 0xd7, 0xd7, 0xd7} };
+    nRF_Values PRX_Config_Data = {SPI1, 76, 4, 0x06, 0x08, 0x03, 0x03, 0x4F, 0x00, 0x70,{0xd7, 0xd7, 0xd7, 0xd7, 0xd7 },\
+                                {0xd7, 0xd7, 0xd7, 0xd7, 0xd7}, {0xe7, 0xe7, 0xe7, 0xe7, 0xe7} };
+
+    uint8_t data[4] = {0x24, 0x54, 0xFE, 0x4D};
 
     new_cluster = Alloc_nRF_Cluster();
+    
+    /* Reset both modules before beginning */
+    new_cluster->Reset_Module(SPI0);
+    new_cluster->Reset_Module(SPI1);
 
-    new_cluster->PTX(PTX_Config_Data);
-    new_cluster->PRX(PRX_Config_Data);
+    /*Config the modules with the new configs */
+    
+    /* PTX Config */
+    new_cluster->Config_Modules = &nrf_Config_PTX;
+    new_cluster->Config_Modules(PTX_Config_Data);
+
+    /* PRX Config */
+    new_cluster->Config_Modules = &nrf_Config_PRX;
+    new_cluster->Config_Modules(PRX_Config_Data);
+
+    /* Fill the TX Buffer with the Payload */
+    new_cluster->fill_buffer(SPI0, &data[0], 4);
+
+    /* Turn-On the Modules! */
+    new_cluster->Activate_Modules(SPI1, SPI0);
+    
+    delay(200);
+
+    /* Turn-Off the Modules! */
+    new_cluster->Activate_Modules = &Turn_Off_Modules;
+    new_cluster->Activate_Modules(SPI1, SPI0);
+    
+    /* Debug -- Dump all Register values! */
+    new_cluster->Dump_Register_Values(SPI0);
+    new_cluster->Dump_Register_Values(SPI1);
+   
+    /* Read the data from the RX Buffer */
+    uint8_t data_read[4] = {0};
+    new_cluster->Read_Payload_Buffer(SPI1, &data_read[0], 4);
 
     free(new_cluster);
-
-
-
 
 #endif
 
@@ -76,7 +106,7 @@ int main(void)
 
     uint8_t read_status_value = 0;
     Read_Status(&read_status_value);
-
+#if 0
     //Enable_Write_Latch();
     Disable_Write_Latch();
 
@@ -92,7 +122,7 @@ int main(void)
     Write_Page_Data_to_EEPROM(&write_data[0], &address, 3);
 
     Read_Page_Data_from_EEPROM(&data[0], &address, 4);
-
+#endif
     delay(10);
 
 #endif
