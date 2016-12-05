@@ -134,7 +134,7 @@ uint8_t Send_Write_Value(void *spi, uint8_t write_value)
 	return ret_value;
 }
 
-uint8_t Abs_Write_5B_to_nRF_Register(void *spi, reg_map reg, uint8_t *value)
+errors Abs_Write_5B_to_nRF_Register(void *spi, reg_map reg, uint8_t *value)
 {
     uint8_t *temp_value = value; 
     uint8_t reg_addr = 0;
@@ -153,7 +153,7 @@ uint8_t Abs_Write_5B_to_nRF_Register(void *spi, reg_map reg, uint8_t *value)
     }
     Pull_CS_High(spi);
 
-    return 0;
+    return FIVE_BYTES_SUCCESSFULLY_WRITTEN;
 
 }
 
@@ -299,18 +299,18 @@ void config_tx_addr(nRF_Values config_data)
 
     Abs_Write_5B_to_nRF_Register(config_data.spi_number, RX_ADDR_P0,\
                                     &config_data.set_RX_ADDR_P0[0]);
-    Read_5_Bytes(config_data.spi_number, RX_ADDR_P0,\
+    //Read_5_Bytes(config_data.spi_number, RX_ADDR_P0,\
                                     &ret_value[0]);
     
     Abs_Write_5B_to_nRF_Register(config_data.spi_number, TX_ADDR,\
                                     &config_data.set_TX_ADDR[0]);
-    Read_5_Bytes(config_data.spi_number, TX_ADDR,\
+    //Read_5_Bytes(config_data.spi_number, TX_ADDR,\
                                     &ret_value[0]);
 
     //uint8_t value_1[5] = {0xd7, 0xd7, 0xd7, 0xd7, 0xd7};
     Abs_Write_5B_to_nRF_Register(config_data.spi_number, RX_ADDR_P1,\
                                     &config_data.set_RX_ADDR_P1[0]);
-    Read_5_Bytes(SPI0, RX_ADDR_P1, &ret_value[0]);
+    //Read_5_Bytes(SPI0, RX_ADDR_P1, &ret_value[0]);
     
 }
 
@@ -319,15 +319,18 @@ void config_rx_addr(nRF_Values config_data)
     uint8_t ret_value[5] = {0};
     //uint8_t rx_addr_val[] = { 0xd7, 0xd7, 0xd7, 0xd7, 0xd7 };
 
-    Abs_Write_5B_to_nRF_Register(config_data.spi_number, RX_ADDR_P0, &config_data.set_RX_ADDR_P0[0]);
-    Read_5_Bytes(SPI1, RX_ADDR_P0, &ret_value[0]);
+    Abs_Write_5B_to_nRF_Register(config_data.spi_number, RX_ADDR_P0,\
+                                    &config_data.set_RX_ADDR_P0[0]);
+    //Read_5_Bytes(SPI1, RX_ADDR_P0, &ret_value[0]);
     
-    Abs_Write_5B_to_nRF_Register(config_data.spi_number, TX_ADDR, &config_data.set_TX_ADDR[0]);
-    Read_5_Bytes(SPI1, TX_ADDR, &ret_value[0]);
+    Abs_Write_5B_to_nRF_Register(config_data.spi_number, TX_ADDR,\
+                                    &config_data.set_TX_ADDR[0]);
+    //Read_5_Bytes(SPI1, TX_ADDR, &ret_value[0]);
 
     //uint8_t value_1[5] = {0xe7, 0xe7, 0xe7, 0xe7, 0xe7};
-    Abs_Write_5B_to_nRF_Register(config_data.spi_number, RX_ADDR_P1, &config_data.set_RX_ADDR_P1[0]);
-    Read_5_Bytes(SPI1, RX_ADDR_P1, &ret_value[0]);
+    Abs_Write_5B_to_nRF_Register(config_data.spi_number, RX_ADDR_P1,\
+                                    &config_data.set_RX_ADDR_P1[0]);
+    //Read_5_Bytes(SPI1, RX_ADDR_P1, &ret_value[0]);
 }
 
 errors fill_nRF_buffer(void *spi, uint8_t *data, uint8_t length)

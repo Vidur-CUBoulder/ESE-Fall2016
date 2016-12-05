@@ -11,6 +11,11 @@
 #include "error_handling.h"
 #include "spi_masks.h"
 
+#define RESET_nRF_Modules() reset_all_registers(SPI1);\
+                            reset_all_registers(SPI0)
+
+/********** DEBUGGING RETURN TYPES ************/
+
 typedef enum errors_t {
 	SUCCESSFUL,
 	INCORRECT_ENTRY,
@@ -25,11 +30,12 @@ typedef enum errors_t {
         PRX_CONFIG_SUCCESSFUL,
         BUFFER_FILLED,
         nRF_MODULES_ON,
-        nRF_MODULES_OFF
-
+        nRF_MODULES_OFF,
+        FIVE_BYTES_SUCCESSFULLY_WRITTEN
 
 } errors;
 
+/******* nRF CONFIGURATION DATA STORAGE *****/
 typedef struct nRF_Values_t {
     void *spi_number;
     uint8_t set_RF_CH;
@@ -47,6 +53,9 @@ typedef struct nRF_Values_t {
 } nRF_Values;
 
 
+/*
+ * assimilate the data and functions into a cluster type
+ */
 typedef struct nRF_Devices_t {
 
     errors (*Reset_Module)(void *);
@@ -58,103 +67,149 @@ typedef struct nRF_Devices_t {
 
 } nRF_Cluster;
 
-#define RESET_nRF_Modules() reset_all_registers(SPI1);\
-                            reset_all_registers(SPI0)
-
-
 /* Function: Send_Read_Write_Command(void *spi, uint8_t *cmd)
- * Parameters: Command byte that has to be sent to the nRF module.
- * This could be either for reading or writing.
+ * Parameters:
+ *      a. *spi : the SPI module used.
+ *      b. *cmd : the data that you want to pass to the SPI.
  * Return: Value returned by the nRF module
  * Description: Send the command byte to the nRF module and return
  * the value that MISO pushes back into the Rx Buffer.
  */
 uint8_t Send_Read_Write_Command(void *spi, uint8_t *cmd);
 
-/*Function: Send_Write_Value(uint8_t write_value)
- * Parameters: value that has to be written to the nRF register.
+/*Function: Send_Write_Value(void *spi, uint8_t write_value)
+ * Parameters:
+ *      a. *spi: the SPI module used.
+ *      b. write_value: the value to be written to the module.
  * Return: Value that is returned via MISO to the Master Device.
  * Description: Send the write value to the respective nRF register.
- * XXX: Please note that this function must be preceded by Send_Read_Write_Command(*cmd)!
  * Failure to do this will result in an unexpected behavior.
  */
 uint8_t Send_Write_Value(void *spi, uint8_t write_value);
 
-/*Function: Write_to_nRF(int8_t reg_value, reg_map reg);
- * Parameters: 
- *      a. reg_value: value that has to be written into the specified register
- *      b. reg_map reg: the register into which you want the value written
- * Return: a debug handle
- * Description: function to write a value into a given register
- */
-int8_t Write_to_nRF(/*int8_t*/reg_map reg, int8_t *reg_value);
-
-/* Function: Setup_nRF(void)
- * Parameters: void
- * Return: NULL
- * Description: used to do the prelimary setup prcedueres for the nRF
- *              TX and RX modules.
- */
-errors Setup_nRF(void);
-
-/* Function: Read_Rx_Payload(uint8_t length, uint8_t *data)
+/*Function: Flush_RX(void *spi)
  * Parameters:
- *      a. length: the length of the data that you want to extract from the R_RX_PAYLOAD
- *      b. *data: the pointer where you want to store the read data.
- * Return: a handle that can be used for debugging.
- * Description: This function can be used to read the payload that has been
- *              transfered to the PTX module wirelessly.
+ *      *spi: the SPI module used.
+ * Return: nothing.
+ * Description: Flush the RX register in the nRF module.
  */
-errors Read_Rx_Payload(uint8_t length, uint8_t *data); 
-
-void setup_begin_config(); 
-
-void setup_nRF_radio();
-
 void Flush_RX(void *spi);
 
+/*Function: Flush_TX(void *spi)
+ * Parameters:
+ *      *spi: the SPI module used.
+ * Return: nothing.
+ * Description: Flush the TX register in the nRF module.
+ */
 void Flush_TX(void *spi);
 
-uint8_t Abs_Write_5B_to_nRF_Register(void *spi, reg_map reg, uint8_t *value);
+/* Function: Abs_Write_5B_to_nRF_Register(void *spi, reg_map reg, uint8_t *value);
+ * Parameters:
+ *      a. *spi : the SPI module that is being used.
+ *      b. reg: the register that you want to write to.
+ *      c. *value: the value that you want to write into the register.
+ * Return: a debug handle that can be used for debugging.
+ * Description: used to write 5Bytes to the nRF Register.
+ */
+errors Abs_Write_5B_to_nRF_Register(void *spi, reg_map reg, uint8_t *value);
 
+/*Function: reset_all_registers(void *spi)
+ * Parameters: 
+ *      *spi: define the SPI module that is being used.
+ * Return: Resets all the registers in the nRF module to its default
+ *              values.
+ * Description: Used to reset all the registers in the nRF module.
+ */
 errors reset_all_registers(void *spi);
 
-void Setup_PTX_Device();
+/*Function: config_tx_addr(nRF_Values config_data)
+ * Parameters:
+ *      config_data: the config values for the particular nRF module.
+ * Return: void.
+ * Description: used to configure the TX address for the nRF module.
+ */
+void config_tx_addr(nRF_Values config_data);
 
-void Setup_PRX_Device();
+/*Function: config_rx_addr(nRF_Values config_data)
+ * Parameters:
+ *      config_data: the config values for the particular nRF module.
+ * Return: void.
+ * Description: used to configure the RX address for the nRF module.
+ */
+void config_rx_addr(nRF_Values config_data);
 
-
-
-void setup_common_nRF_char(void);
-
-void set_device_addr(void);
-
-void Setup_TX(void);
-
-//void config_tx_addr(nRF_Values config_data);
-//void config_rx_addr(nRF_Values config_data);
-
+/*Function: fill_nRF_buffer(void *spi, uint8_t *data, uint8_t length)
+ * Parameters:
+ *      a. *spi: the SPI module that you are accessing.
+ *      b. *data: the data that you want to fill the nRF buffer with.
+ *      c. length: the length of the data that you want to write into 
+ *                      the nRF TX buffer.
+ * Return: a debug handle that you may use for debugging purposes.
+ * Description: Used to write into the TX buffer of a nRF module.
+ */
 errors fill_nRF_buffer(void *spi, uint8_t *data, uint8_t length);
 
+/*Function: nrf_Config_PTX(nRF_Values config_data)
+ * Parameters:
+ *      config_data: the data that you want to config the 
+ *                      PTX module with.
+ * Return: a debug handle that you can use for debugging purposes.
+ * Description: used to do the initial config. for the PTX module.
+ */
 errors nrf_Config_PTX(nRF_Values config_data);
 
+/*Function: nrf_Config_PRX(nRF_Values config_data)
+ * Parameters:
+ *      config_data: the data that you want to config the 
+ *                      PRX module with.
+ * Return: a debug handle that you can use for debugging purposes.
+ * Description: used to do the initial config. for the PRX module.
+ */
 errors nrf_Config_PRX(nRF_Values config_data);
 
-nRF_Cluster *Alloc_nRF_Cluster();
+/*Function: *Alloc_nRF_Cluster(void)
+ * Parameters: void
+ * Return: a pointer to the nRF_Cluster struct.
+ * Description: init. the function to the various function pointers
+ *              of declared in the struct.
+ */
+nRF_Cluster *Alloc_nRF_Cluster(void);
 
+/*Function: Turn_On_Modules(void *SPI_RX, void *SPI_TX)
+ * Parameters:
+ *      *SPI_RX: the SPI number that is being used to access the PRX.
+ *      *SPI_TX: the SPI number that is being used to access the PTX.
+ * Return: a debug handle that can be used for debugging.
+ * Description: Run the procedures to turn on the PTX and PRX modules.
+ */
 errors Turn_On_Modules(void *SPI_RX/*SPI1*/, void *SPI_TX/*SPI0*/);
 
+/*Function: Turn_Off_Modules(void *SPI_RX, void *SPI_TX)
+ * Parameters:
+ *      *SPI_RX: the SPI number that is being used to access the PRX.
+ *      *SPI_TX: the SPI number that is being used to access the PTX.
+ * Return: a debug handle that can be used for debugging.
+ * Description: Run the procedures to turn off the PTX and PRX modules.
+ */
 errors Turn_Off_Modules(void *SPI_RX/*SPI1*/, void *SPI_TX/*SPI0*/);
 
+/*Function: Read_RX_Payload(void *spi, uint8_t *read_data, uint8_t len);
+ * Parameters:
+ *      a. *spi: the SPI number that the nRF module is connected to.
+ *      b. *read_data: the location where you want to store the read data.
+ *      c. len: the length of the data that you want to read from the payload.
+ * Return: a debug handle that can be used for debugging purposes.
+ * Description: Read the payload data from the nRF modules.
+ */
 errors Read_RX_Payload(void *spi, uint8_t *read_data, uint8_t len);
 
+/*Function: Dump_Reg(void *spi)
+ * Parameters:
+ *      *spi: the spi number that you want to use.
+ * Return: a debug handle that can be used for debugging.
+ * Description: used to Dump all the nRF registers connected to the particular
+ *                     SPI module/number.
+ */
 errors Dump_Reg(void *spi);
-
-/* Testing functions */
-void nrf_Config_PTX_PRX();
-void config_tx_addr();
-void config_rx_addr();
-void fill_tx_buffer(uint8_t *data);
-
 
 #endif /* INCLUDES_NRF_H_ */

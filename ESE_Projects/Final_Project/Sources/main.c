@@ -43,7 +43,6 @@
 int main(void)
 {
 
-
 #ifdef Final_Program
 
     nRF_Cluster *new_cluster = NULL;
