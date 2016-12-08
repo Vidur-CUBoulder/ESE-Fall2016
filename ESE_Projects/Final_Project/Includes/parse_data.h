@@ -21,6 +21,8 @@
 
 #define UART_STOP_BYTE 0x23
 
+#define CLI_PARSER
+
 typedef enum cmds_t {
 	commands 	= 0,
 	baudrate 	= 1,
@@ -123,7 +125,7 @@ errors modify_intensity(ledcolors color);
 
 errors set_union_values(CLI *cmd_in, char *word);
 
-errors get_CLI(char *str_data, uint32_t *len);
+errors get_CLI(char *str_data/*, uint32_t *len*/);
 
 static char *set_CLI_commands(cmds command);
 

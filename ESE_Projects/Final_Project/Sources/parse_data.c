@@ -83,71 +83,71 @@ errors act_on_command(CLI *command_in)
 {
 
 #ifdef DEBUG
-	/*For debugging purposes
-	 * No need to do extra work if not needed!
-	 */
-	init_uart();
-	config_transmit();
+    /*For debugging purposes
+     * No need to do extra work if not needed!
+     */
+    init_uart();
+    config_transmit();
 #endif
 
-	switch(command_in->command)
-	{
+    switch(command_in->command)
+    {
 
-		case commands: /*Output a list of the available command on the UART*/
-						break;
+        case commands: /*Output a list of the available command on the UART*/
+            break;
 
-		case ledcolor: /*Set the color of the led and turn on that LED */
+        case ledcolor: /*Set the color of the led and turn on that LED */
 
-						config_leds();
+            config_leds();
 
-						switch(command_in->data[0])
-						{
-							case blue: MY_LOG("Turning on the Blue LED\n");
-									   turn_on_leds(blue);
-									   break;
+            switch(command_in->data[0])
+            {
+                case blue: MY_LOG("Turning on the Blue LED\n");
+                           turn_on_leds(blue);
+                           break;
 
-							case red: MY_LOG("Turning on the Red LED\n");
-									  turn_on_leds(red);
-									  break;
+                case red: MY_LOG("Turning on the Red LED\n");
+                          turn_on_leds(red);
+                          break;
 
-							case green: MY_LOG("Turning on the Green LED\n");
-										turn_on_leds(green);
-										break;
+                case green: MY_LOG("Turning on the Green LED\n");
+                            turn_on_leds(green);
+                            break;
 
-							case white: MY_LOG("Turning on the White LED\n");
-										turn_on_leds(white);
-										break;
+                case white: MY_LOG("Turning on the White LED\n");
+                            turn_on_leds(white);
+                            break;
 
-							case magenta: MY_LOG("Turning on the Magenta LED\n");
-										 turn_on_leds(magenta);
-										 break;
+                case magenta: MY_LOG("Turning on the Magenta LED\n");
+                              turn_on_leds(magenta);
+                              break;
 
-							case cyan: MY_LOG("Turning on the Cyan LED\n");
-									   turn_on_leds(cyan);
-									   break;
+                case cyan: MY_LOG("Turning on the Cyan LED\n");
+                           turn_on_leds(cyan);
+                           break;
 
-							case yellow: MY_LOG("Turning on the Yellow LED\n");
-										 turn_on_leds(yellow);
-										 break;
+                case yellow: MY_LOG("Turning on the Yellow LED\n");
+                             turn_on_leds(yellow);
+                             break;
 
-							default: MY_LOG("Keeping all LEDs off by default\n");
-									 turn_on_leds(0xFF); /*Entering the default case*/
-						}
-						break;
+                default: MY_LOG("Keeping all LEDs off by default\n");
+                         turn_on_leds(0xFF); /*Entering the default case*/
+            }
+            break;
 
-		case intensity: /* Set the intensity of the LED! */
-						MY_LOG("Setting the LED Intensity\n");
-						MY_LOG("Press 'W' to increase and 'S' to decrease\n");
-						MY_LOG("Press 'Q' to quit.\n");
-						modify_intensity(command_in->data[1]);
-						break;
+        case intensity: /* Set the intensity of the LED! */
+            MY_LOG("Setting the LED Intensity\n");
+            MY_LOG("Press 'W' to increase and 'S' to decrease\n");
+            MY_LOG("Press 'Q' to quit.\n");
+            modify_intensity(command_in->data[1]);
+            break;
 
-		default: /*Defining the default case*/
-				MY_LOG("In the DEFAULT case! Exiting! \n");
-				return INVALID;
-	}
+        default: /*Defining the default case*/
+            MY_LOG("In the DEFAULT case! Exiting! \n");
+            return INVALID;
+    }
 
-	return SUCCESSFUL;
+    return SUCCESSFUL;
 
 }
 
@@ -201,30 +201,31 @@ errors modify_intensity(ledcolors color)
 
 #ifdef CLI_PARSER
 
-errors get_CLI(char *str_data, uint32_t *len)
+errors get_CLI(char *str_data/*, uint32_t *len*/)
 {
-	if (str_data == NULL) {
-		return NULL_FAILURE;
-	}
+    if (str_data == NULL) {
+        return NULL_FAILURE;
+    }
 
-	init_uart();
-	config_receive();
-	uint8_t count = 0;
+    init_uart();
+    config_receive();
+    uint8_t count = 0;
+    //uint8_t temp_len = *len;
 
-	while (1) {
-		while(!(UART0_S1 & 0x20)) {
-			/*Wait for Buffer Full!*/
-		}
+    while (1) {
+        while(!(UART0_S1 & 0x20)) {
+            /*Wait for Buffer Full!*/
+        }
 
-		*(str_data + count) = UART0->D;
-		if( *(str_data+count) == 0x0A || *(str_data+count) == 0x0D) {
-			/* Signifies end of the CLI command */
-			*len = (count - 1);
-			return SUCCESSFUL;
-		}
-		count++;
-	}
-	return INVALID;
+        *(str_data + count) = UART0->D;
+        if( *(str_data+count) == 0x0A || *(str_data+count) == 0x0D) {
+            /* Signifies end of the CLI command */
+            //temp_len = (count - 1);
+            return SUCCESSFUL;
+        }
+        count++;
+    }
+    return INVALID;
 }
 
 static char *set_CLI_commands(cmds command)
@@ -239,38 +240,40 @@ static char *set_CLI_ledcolors(ledcolors colors)
 	return act_strings[colors];
 }
 
+#if 0
 errors parse_CLI(char *cli_data, CLI *cmd_in)
 {
-	uint32_t pos = 0;
-	uint8_t cntr = 0;
-	char *word = NULL;
-	word = (char *)malloc(sizeof(char) * 15);
+    uint32_t pos = 0;
+    uint8_t cntr = 0;
+    char *word = NULL;
+    word = (char *)malloc(sizeof(char) * 15);
 
-	pos = get_word(cli_data, word, *cmd_in, pos);
-	if(!strcmp(word, "show")) {
-		cmd_in->act = show;
-		cmd_in->command = commands;
-		free(word);
-		return SUCCESSFUL;
-	} else if (!strcmp(word, "set")) {
-		pos = get_word(cli_data, word, *cmd_in, pos);
-		cmd_in->act = set;
-		for(cntr = commands ; cntr<= kill_program; cntr++) {
-			if( !strcmp(word, set_CLI_commands(cntr)) ) {
-				cmd_in->command = cntr;
-				pos = get_word(cli_data, word, *cmd_in, pos);
-				set_union_values(cmd_in, word);
-				free(word);
-				return SUCCESSFUL;
-			}
-		}
-		free(word);
-	} else {
-		return INCORRECT_ENTRY;
-	}
+    pos = get_word(cli_data, word, *cmd_in, pos);
+    if(!strcmp(word, "show")) {
+        cmd_in->act = show;
+        cmd_in->command = commands;
+        free(word);
+        return SUCCESSFUL;
+    } else if (!strcmp(word, "set")) {
+        pos = get_word(cli_data, word, *cmd_in, pos);
+        cmd_in->act = set;
+        for(cntr = commands ; cntr<= kill_program; cntr++) {
+            if( !strcmp(word, set_CLI_commands(cntr)) ) {
+                cmd_in->command = cntr;
+                pos = get_word(cli_data, word, *cmd_in, pos);
+                set_union_values(cmd_in, word);
+                free(word);
+                return SUCCESSFUL;
+            }
+        }
+        free(word);
+    } else {
+        return INCORRECT_ENTRY;
+    }
 
-	return SUCCESSFUL;
+    return SUCCESSFUL;
 }
+#endif
 
 errors set_union_values(CLI *cmd_in, char *word)
 {

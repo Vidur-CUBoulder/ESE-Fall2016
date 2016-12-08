@@ -9,6 +9,7 @@
 #define INCLUDES_MAIN_H_
 
 #include "MKL25Z4.h"
+#include "pthread.h"
 #include "uart.h"
 #include "dma.h"
 #include "error_handling.h"

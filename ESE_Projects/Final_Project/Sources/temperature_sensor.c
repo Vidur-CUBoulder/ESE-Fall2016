@@ -24,7 +24,7 @@ void Init_Temp_Sensor(void)
      *  d. Clock select: the bus clock.
      */
     ADC0_CFG1 =  SET_CLOCK_RATIO | SET_LONG_SAMPLE_PERIODS\
-                 | SELECT_12_BIT_CONVERSION_MODE | SELECT_BUS_CLK;
+                 | SELECT_10_BIT_CONVERSION_MODE | SELECT_BUS_CLK;
 
 }
 

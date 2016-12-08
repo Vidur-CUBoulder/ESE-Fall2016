@@ -8,17 +8,6 @@
 #include "spi_masks.h"
 #include "spi.h"
 
-/*void reset_all_registers(void *spi_type)
-{
-    uint8_t a = 0;
-    if(spi_type == SPI0) {
-        a = 4;
-    } else if(spi_type == SPI1) {
-        a = 7;
-    }
-
-}*/
-
 errors reset_all_registers(void *spi)
 {
     Abs_Write_to_nRF_Register(spi, CONFIG, 0x80);
@@ -166,23 +155,80 @@ nRF_Cluster *Alloc_nRF_Cluster()
     cluster->Config_Modules = &nrf_Config_PTX;
     cluster->fill_buffer = &fill_nRF_buffer;
     cluster->Activate_Modules = &Turn_On_Modules;
-    cluster->Read_Payload_Buffer = &Read_RX_Payload;
+    cluster->Read_Payload_Buffer = &Read_Payload_Register_Value;
+    cluster->Free_Cluster = &Free_nRF_Cluster;
 
     return cluster;
+}
+
+errors Free_nRF_Cluster(nRF_Cluster *cluster)
+{
+    if (cluster == NULL) {
+        return NULL_FAILURE;
+    }
+
+    free(cluster);
+    
+    return CLUSTER_SPACE_CLEARED;
+}
+
+errors Read_Payload_Register_Value(void *spi, nRF_Cluster *new_cluster, uint8_t *data,\
+                                        uint8_t len)
+{
+    if( data == NULL ) {
+        return NULL_FAILURE;
+    }
+
+    /* Turn-Off the Modules! */
+    new_cluster->Activate_Modules = &Turn_Off_Modules;
+    new_cluster->Activate_Modules(SPI1, SPI0);
+    
+    /* Debug -- Dump all Register values! */
+    new_cluster->Dump_Register_Values(SPI0);
+    new_cluster->Dump_Register_Values(SPI1);
+   
+    /* Read the data from the RX Buffer */
+    uint8_t data_read[4] = {0};
+    Read_RX_Payload(spi, &data_read[0], len);
+    
+    return 0;
+}
+
+errors init_nRF_modules(nRF_Cluster *new_cluster, nRF_Values *PTX_Config_Data,\
+                            nRF_Values *PRX_Config_Data)
+{
+    errors debug_handle = 0;
+
+    /* Reset both modules before beginning */
+    new_cluster->Reset_Module(PTX_Config_Data->spi_number);
+    new_cluster->Reset_Module(PRX_Config_Data->spi_number);
+
+    /*Config the modules with the new configs */
+    
+    /* PTX Config */
+    new_cluster->Config_Modules = &nrf_Config_PTX;
+    new_cluster->Config_Modules(*PTX_Config_Data);
+
+    /* PRX Config */
+    new_cluster->Config_Modules = &nrf_Config_PRX;
+    new_cluster->Config_Modules(*PRX_Config_Data);
+
+    return nRF_MODULES_SUCCESSFULLY_INIT;
 }
 
 errors nrf_Config_PRX(nRF_Values config_data)
 {
 
     /*  Config Information:->
-     *  RF_CH : Channel : 2 
+     *  RF_CH : Channel : 76
      *  RX_PW_P1 : Payload_Length: 4
-     *  RF_SETUP : 1Mbps, TX gain: 0db
-     *  CONFIG :  CRC enabled, 1B CRC length
-     *  EN_AA : pipes 0 and 1
-     *  EN_RXADDR : again pipes 0 and 1
-     *  SETUP_RETR : 1000us and 15 re-trans trials
-     *  disable DYNPD completely
+     *  RF_SETUP : 1Mbps, TX gain: 0db - 0x06
+     *  CONFIG :  CRC enabled, 1B CRC length - 0x08
+     *  EN_AA : pipes 0 and 1 - 0x03
+     *  EN_RXADDR : again pipes 0 and 1 - 0x03
+     *  SETUP_RETR : 1000us and 15 re-trans trials - 0x4F
+     *  disable DYNPD completely - 0x00
+     *  Status register - 0x70
      */
 
     /* RF_CH */
@@ -295,48 +341,35 @@ void config_tx_addr(nRF_Values config_data)
 {
     /* RX_ADDR_P0 must be set to the sending address for the auto ack to work! */
     uint8_t ret_value[5] = {0};
-    //uint8_t rx_addr_val[] = { 0xe7, 0xe7, 0xe7, 0xe7, 0xe7 };
 
     Abs_Write_5B_to_nRF_Register(config_data.spi_number, RX_ADDR_P0,\
                                     &config_data.set_RX_ADDR_P0[0]);
-    //Read_5_Bytes(config_data.spi_number, RX_ADDR_P0,\
-                                    &ret_value[0]);
     
     Abs_Write_5B_to_nRF_Register(config_data.spi_number, TX_ADDR,\
                                     &config_data.set_TX_ADDR[0]);
-    //Read_5_Bytes(config_data.spi_number, TX_ADDR,\
-                                    &ret_value[0]);
 
-    //uint8_t value_1[5] = {0xd7, 0xd7, 0xd7, 0xd7, 0xd7};
     Abs_Write_5B_to_nRF_Register(config_data.spi_number, RX_ADDR_P1,\
                                     &config_data.set_RX_ADDR_P1[0]);
-    //Read_5_Bytes(SPI0, RX_ADDR_P1, &ret_value[0]);
-    
 }
 
 void config_rx_addr(nRF_Values config_data)
 {
     uint8_t ret_value[5] = {0};
-    //uint8_t rx_addr_val[] = { 0xd7, 0xd7, 0xd7, 0xd7, 0xd7 };
 
     Abs_Write_5B_to_nRF_Register(config_data.spi_number, RX_ADDR_P0,\
                                     &config_data.set_RX_ADDR_P0[0]);
-    //Read_5_Bytes(SPI1, RX_ADDR_P0, &ret_value[0]);
     
     Abs_Write_5B_to_nRF_Register(config_data.spi_number, TX_ADDR,\
                                     &config_data.set_TX_ADDR[0]);
-    //Read_5_Bytes(SPI1, TX_ADDR, &ret_value[0]);
 
     //uint8_t value_1[5] = {0xe7, 0xe7, 0xe7, 0xe7, 0xe7};
     Abs_Write_5B_to_nRF_Register(config_data.spi_number, RX_ADDR_P1,\
                                     &config_data.set_RX_ADDR_P1[0]);
-    //Read_5_Bytes(SPI1, RX_ADDR_P1, &ret_value[0]);
 }
 
 errors fill_nRF_buffer(void *spi, uint8_t *data, uint8_t length)
 {
     //Write to the TX payload!
-     
     Pull_CS_Low(spi);
     
     uint8_t cmd = W_TX_PAYLOAD;
@@ -345,7 +378,6 @@ errors fill_nRF_buffer(void *spi, uint8_t *data, uint8_t length)
     delay(10);
 
     //Now start pushing the data into the payload buffer
-    //uint8_t len = 4;
     while(length) {
         Send_Write_Value(spi, *(data++));
         length--;
@@ -405,8 +437,6 @@ errors Read_RX_Payload(void *spi, uint8_t *read_data, uint8_t len)
     delay(10);
    
     cmd = NOP;
-    //uint8_t data_1[4] = {0};
-    //uint8_t len = 4;
     while(len) {
         *(read_data++) = Send_Read_Write_Command(spi, &cmd);
         len--;

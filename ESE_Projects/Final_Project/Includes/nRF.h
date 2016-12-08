@@ -14,24 +14,24 @@
 #define RESET_nRF_Modules() reset_all_registers(SPI1);\
                             reset_all_registers(SPI0)
 
-/********** DEBUGGING RETURN TYPES ************/
+#define DATA_IN_RX_PAYLOAD 0x42
 
+/********** DEBUGGING RETURN TYPES ************/
 typedef enum errors_t {
 	SUCCESSFUL,
 	INCORRECT_ENTRY,
 	NULL_FAILURE,
 	INVALID,
-	INVALID_RET_FROM_nRF,
-	nRF_READ_SUCCESSFUL,
-	nRF_READ_FAILURE,
-        nRF_SETUP_SUCCESSFUL,
-        PAYLOAD_READ_SUCCESSFUL,
         PTX_CONFIG_SUCCESSFUL,
         PRX_CONFIG_SUCCESSFUL,
         BUFFER_FILLED,
+        nRF_READ_SUCCESSFUL,
+        nRF_READ_FAILURE,
         nRF_MODULES_ON,
         nRF_MODULES_OFF,
-        FIVE_BYTES_SUCCESSFULLY_WRITTEN
+        FIVE_BYTES_SUCCESSFULLY_WRITTEN,
+        nRF_MODULES_SUCCESSFULLY_INIT,
+        CLUSTER_SPACE_CLEARED
 
 } errors;
 
@@ -63,7 +63,8 @@ typedef struct nRF_Devices_t {
     errors (*Config_Modules)(nRF_Values );
     errors (*fill_buffer)(void *, uint8_t *, uint8_t );
     errors (*Activate_Modules)(void *, void *);
-    errors (*Read_Payload_Buffer)(void *, uint8_t *, uint8_t );
+    errors (*Read_Payload_Buffer)(void * ,struct nRF_Devices_t * , uint8_t *, uint8_t );
+    errors (*Free_Cluster)(struct nRF_Devices_t *);
 
 } nRF_Cluster;
 
@@ -211,5 +212,12 @@ errors Read_RX_Payload(void *spi, uint8_t *read_data, uint8_t len);
  *                     SPI module/number.
  */
 errors Dump_Reg(void *spi);
+
+errors init_nRF_modules(nRF_Cluster *new_cluster, nRF_Values *,\
+                            nRF_Values *);
+
+errors Read_Payload_Register_Value(void *, nRF_Cluster *new_cluster, uint8_t *data, uint8_t len);
+
+errors Free_nRF_Cluster(nRF_Cluster *cluster);
 
 #endif /* INCLUDES_NRF_H_ */
