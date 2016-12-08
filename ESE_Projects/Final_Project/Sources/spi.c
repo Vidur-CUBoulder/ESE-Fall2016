@@ -182,6 +182,8 @@ uint8_t Read_from_nRF_Register(void *spi, reg_map reg, uint8_t *ret_value)
 	*ret_value = Send_Read_Write_Command(spi, &cmd);
         Pull_CS_High(spi);
 
+        MY_LOG_PARAMS("Register: ", reg_map_data[0]);
+
 	return *ret_value;
 
 }

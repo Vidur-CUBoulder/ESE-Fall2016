@@ -163,15 +163,21 @@ errors act_on_command(CLI *command_in, nRF_Cluster *new_cluster, nRF_Values *PTX
         case nRF_Setup:
 
             MY_LOG("Configure the nRF for Wireless Trasnmission!\n");
-
-            //spi_0_init();
-            //spi_1_init();
             
             init_nRF_modules(new_cluster, PTX_Config_Data, PRX_Config_Data);
         
             MY_LOG("nRF Modules Successfully Configured for Wireless Trasnmisstion!\n");
 
             is_nrf_setup = 1;
+
+            break;
+
+        case nRF_Dump_Reg_Values:
+
+            MY_LOG("Dumping the register values now!\n");
+
+            new_cluster->Dump_Register_Values(SPI0);
+            new_cluster->Dump_Register_Values(SPI1);
 
             break;
 

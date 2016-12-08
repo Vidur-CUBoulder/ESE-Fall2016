@@ -142,6 +142,8 @@ typedef enum register_defs_t {
     FEATURE        = 0x1D
 } reg_map;
 
+uint8_t reg_map_data[] = {"Config", "EN_AA"};
+
 /* Misc. Macros */
 
 #define MAX_REG_LENGTH 5

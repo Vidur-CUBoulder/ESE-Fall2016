@@ -30,6 +30,7 @@ typedef enum cmds_t {
         nRF_Payload_Setup       = 0x21,
         nRF_Start_Comm          = 0x22,
         nRF_Read_RX_Payload     = 0x23,
+        nRF_Dump_Reg_Values     = 0x24,
         read_temp_sensor        = 0x30,
         kill_program            = 0xFF
 } cmds;
