@@ -16,6 +16,8 @@
 
 #define DATA_IN_RX_PAYLOAD 0x42
 
+#define MAX_PAYLOAD_DATA 32
+
 /********** DEBUGGING RETURN TYPES ************/
 typedef enum errors_t {
 	SUCCESSFUL,
@@ -50,6 +52,7 @@ typedef struct nRF_Values_t {
     uint8_t set_RX_ADDR_P0[5];
     uint8_t set_TX_ADDR[5];
     uint8_t set_RX_ADDR_P1[5];
+    uint8_t store_Payload_Data[MAX_PAYLOAD_DATA];
 } nRF_Values;
 
 

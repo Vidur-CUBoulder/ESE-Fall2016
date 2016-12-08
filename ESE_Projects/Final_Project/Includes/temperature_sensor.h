@@ -35,6 +35,6 @@ void Init_Temp_Sensor(void);
  * Description: Used to read the internal temperature value of the FRDM board.
  *              It will return the value that is read.
  */
-uint8_t Read_Temp_Sensor_Value(uint16_t *value_read);
+uint8_t Read_Temp_Sensor_Value(float *value_read);
 
 #endif /* INCLUDES_TEMPERATURE_SENSOR_H_ */

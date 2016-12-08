@@ -28,7 +28,7 @@ void Init_Temp_Sensor(void)
 
 }
 
-uint8_t Read_Temp_Sensor_Value(uint16_t *value_read)
+uint8_t Read_Temp_Sensor_Value(float *value_read)
 {
     ADC0_SC1A = TEMP_SENSOR_CHANNEL; // Select the channel for the temp. sensor.
     while(WAIT_FOR_CONVERSION_COMPLETION);
@@ -39,9 +39,9 @@ uint8_t Read_Temp_Sensor_Value(uint16_t *value_read)
     Vtemp = *(value_read) * 0.0029296875;
 
     if(Vtemp >= 0.7012) {
-    	Final_Temp = 25 - ((Vtemp - 0.7012)/0.001646);
+    	*value_read = 25 - ((Vtemp - 0.7012)/0.001646);
     } else {
-    	Final_Temp = 25 -((Vtemp - 0.7012)/0.001749);
+    	*value_read = 25 -((Vtemp - 0.7012)/0.001749);
     }
 }
 

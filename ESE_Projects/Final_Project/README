@@ -1,4 +1,6 @@
-Project 4 -- Under Contruction
+Project 4 -- Message and Command Relay Application
+
+# This project aims at constructing an interactable command line and message relay mechanism using the nRF module. The nRF module works on 2 different SPI ports and has their own unique CS, SCK, MOSI and MISO signals. Moreover, there is an effort to store data in an external EEPROM using the UART to relay commands to the FRDM. We can also query the FRDM to throw up on-board IC temperature sensor data. 
 
 File Organization:
 ├── [ 918]  Includes
@@ -45,6 +47,9 @@ File Organization:
 ├── [1.2K]  timer.c
 └── [2.5K]  uart.c
 
+Feature Sets:
 
-
+- Interactive Read/Write from the nRF.
+- Read and Write from the EEPROM
+- Read and dump status and other register values of the nRF and the EEPROM
 

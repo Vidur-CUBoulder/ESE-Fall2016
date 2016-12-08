@@ -100,7 +100,7 @@ void delay(uint8_t value)
 {
 	int i,j =0;
 	for(i=0; i<value; i++) {
-		for(j=0; j<9000; j++){
+		for(j=0; j<5000; j++){
 			/*delay*/
 		}
 	}

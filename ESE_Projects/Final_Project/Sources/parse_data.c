@@ -36,6 +36,7 @@ errors get_message(char *data)
 	return INVALID;
 }
 
+#if 0
 checksum  fletchers_checksum(CLI cmd)
 {
 	uint16_t sum_1 = 0;
@@ -57,6 +58,7 @@ checksum  fletchers_checksum(CLI cmd)
 	}
 
 }
+#endif
 
 errors parse_CLI(char *str_data, CLI *command_in)
 {
@@ -66,35 +68,58 @@ errors parse_CLI(char *str_data, CLI *command_in)
 
 	uint8_t i = 0;
 
-	command_in->command = *(str_data+1);
-	command_in->cmd_length = (*(str_data+2) + 1);
-	while(i != (command_in->cmd_length-2-3)) {
-		command_in->data[i] = *(str_data+3+i);
+	command_in->command = *(str_data);
+	command_in->cmd_length = (*(str_data+1));
+	while(i != (command_in->cmd_length)) {
+		command_in->data[i] = *(str_data+2+i);
 		i++;
 	}
-	command_in->checksum[0] = *(str_data+command_in->cmd_length-2);
-	command_in->checksum[1] = *(str_data+command_in->cmd_length-1);
 
 	return SUCCESSFUL;
 
 }
 
-errors act_on_command(CLI *command_in)
+errors parse_CLI_First(char *str_data, CLI *command_in)
+{
+	if(str_data == NULL) {
+		return NULL_FAILURE;
+	}
+
+	uint8_t i = 0;
+
+	command_in->command = *(str_data+1);
+	command_in->cmd_length = (*(str_data+2));
+	while(i != (command_in->cmd_length)) {
+		command_in->data[i] = *(str_data+3+i);
+		i++;
+	}
+
+	return SUCCESSFUL;
+
+}
+
+/* The data frame format is as follows:
+ *      <cmd> <data length - cmd byte> ....<data>.... < terminating byte : 23(#) >
+ *      The parser will first parse the command and accordingly make a decision on 
+ *      how to store the data in the struct.
+ *      Command List:-
+ *              a. LED Blink/Color.
+ *              b. Config and setup the nRF. 
+ *              c. Put data into the TX payload of the nRF module
+ *              d. Read the data from the RX payload of the nRF module.
+ *              e. Read the on chip temperature sensor data
+ *              f. Send data to store onto the EEPROM.
+ */
+errors act_on_command(CLI *command_in, nRF_Cluster *new_cluster, nRF_Values *PTX_Config_Data,\
+                        nRF_Values *PRX_Config_Data)
 {
 
-#ifdef DEBUG
-    /*For debugging purposes
-     * No need to do extra work if not needed!
-     */
     init_uart();
     config_transmit();
-#endif
+    uint8_t reg_value = 0;
 
     switch(command_in->command)
     {
-
-        case commands: /*Output a list of the available command on the UART*/
-            break;
 
         case ledcolor: /*Set the color of the led and turn on that LED */
 
@@ -135,224 +160,116 @@ errors act_on_command(CLI *command_in)
             }
             break;
 
-        case intensity: /* Set the intensity of the LED! */
-            MY_LOG("Setting the LED Intensity\n");
-            MY_LOG("Press 'W' to increase and 'S' to decrease\n");
-            MY_LOG("Press 'Q' to quit.\n");
-            modify_intensity(command_in->data[1]);
+        case nRF_Setup:
+
+            MY_LOG("Configure the nRF for Wireless Trasnmission!\n");
+
+            //spi_0_init();
+            //spi_1_init();
+            
+            init_nRF_modules(new_cluster, PTX_Config_Data, PRX_Config_Data);
+        
+            MY_LOG("nRF Modules Successfully Configured for Wireless Trasnmisstion!\n");
+
+            is_nrf_setup = 1;
+
+            break;
+
+        case nRF_Payload_Setup:
+            
+            if(!is_nrf_setup) {
+                MY_LOG("You cannot pass data to the nRF without configuring it...\n");
+                return INVALID;
+            }
+
+            MY_LOG("Congiuring the nRF Modules with the Payload provided!\n");
+
+            //Fill the SPI buffer with the data.
+            new_cluster->fill_buffer(PTX_Config_Data->spi_number,\
+                                        command_in->data, 4);
+
+            MY_LOG("Payload Configured Successfully!\n");
+
+            break;
+
+        case nRF_Start_Comm:
+            
+            if(!is_nrf_setup) {
+                MY_LOG("You cannot pass data to the nRF without configuring it...\n");
+                return INVALID;
+            }
+            
+            MY_LOG("Starting the nRF Communication NOW!\n");
+
+            /* Turn-On the Modules! */
+            new_cluster->Activate_Modules(PRX_Config_Data->spi_number,\
+                                          PTX_Config_Data->spi_number);
+
+            /* Instead of the delay, monitor the status register and
+             * if the RX_DR pin is set, come out of the loop and
+             * read the value for the RX payload register.
+             */
+            while(reg_value != DATA_IN_RX_PAYLOAD) {
+                /* Continue reading the Status register until data is received in the 
+                 * RX payload register.
+                 */
+                Read_from_nRF_Register(PRX_Config_Data->spi_number, STATUS, &reg_value);
+            }
+
+            MY_LOG("Successful Communication!\n");
+
+            break;
+
+        case nRF_Read_RX_Payload:
+            
+            if(!is_nrf_setup) {
+                MY_LOG("You cannot pass data to the nRF without configuring it...\n");
+                return INVALID;
+            }
+            
+            MY_LOG("Reading data from the RX Payload...\n");
+            
+            /* Read the data payload from the RX module */
+            Read_Payload_Register_Value(PRX_Config_Data->spi_number, new_cluster,\
+                                        PRX_Config_Data->store_Payload_Data, 3);
+
+            
+            MY_LOG("Data Read:-\n");
+            MY_LOG_PARAMS("->", PRX_Config_Data->store_Payload_Data[0]);
+            MY_LOG("\n");
+            MY_LOG_PARAMS("->", PRX_Config_Data->store_Payload_Data[1]);
+            MY_LOG("\n");
+            MY_LOG_PARAMS("->", PRX_Config_Data->store_Payload_Data[2]);
+            MY_LOG("\n");
+            
+            break; 
+
+        case kill_program:
+                MY_LOG("Exiting From the Program!\n");
+                free(new_cluster);
+                exit(1);
+
+        case read_temp_sensor:
+                MY_LOG("Reading data from the temperature sensor!\n");
+
+                Init_Temp_Sensor();
+
+                float result = 0;
+
+                Read_Temp_Sensor_Value(&result);
+
+                MY_LOG_FLOAT_PARAMS("OUTPUT: ", result, 3);
+
             break;
 
         default: /*Defining the default case*/
             MY_LOG("In the DEFAULT case! Exiting! \n");
+            free(new_cluster);
+            exit(1);
             return INVALID;
     }
 
     return SUCCESSFUL;
 
 }
-
-errors modify_intensity(ledcolors color)
-{
-
-	/* Initialize the UART */
-	init_uart();
-
-	/* Config the UART to receive */
-	config_receive();
-
-	char input;
-	uint16_t pulsewidth = 0;
-
-	while(1) {
-
-		while(!(UART0->S1 & 0x20)) {
-		}
-		input = UART0->D;
-
-		if(input == 'q') {
-			break;
-		}
-
-		if(input == 'w') {
-			pulsewidth+=300;
-		} else if(input == 's') {
-			pulsewidth -= 300;
-		} else {
-			/* turn off the LED */
-			pulsewidth = 0;
-		}
-
-		if(color == blue) {
-			init_PWM_Blue(pulsewidth);
-		} else if (color == red) {
-			init_PWM_Red(pulsewidth);
-		} else if (color == green) {
-			init_PWM_Green(pulsewidth);
-		} else {
-			/*Invalid Color input; exit*/
-			return INVALID;
-		}
-
-	}
-
-	return SUCCESSFUL;
-
-}
-
-#ifdef CLI_PARSER
-
-errors get_CLI(char *str_data/*, uint32_t *len*/)
-{
-    if (str_data == NULL) {
-        return NULL_FAILURE;
-    }
-
-    init_uart();
-    config_receive();
-    uint8_t count = 0;
-    //uint8_t temp_len = *len;
-
-    while (1) {
-        while(!(UART0_S1 & 0x20)) {
-            /*Wait for Buffer Full!*/
-        }
-
-        *(str_data + count) = UART0->D;
-        if( *(str_data+count) == 0x0A || *(str_data+count) == 0x0D) {
-            /* Signifies end of the CLI command */
-            //temp_len = (count - 1);
-            return SUCCESSFUL;
-        }
-        count++;
-    }
-    return INVALID;
-}
-
-static char *set_CLI_commands(cmds command)
-{
-	static char *cmds_strings[] = {"commands", "baudrate", "ledcolor", "intensity", "kill_program"};
-	return cmds_strings[command];
-}
-
-static char *set_CLI_ledcolors(ledcolors colors)
-{
-	static char *act_strings[] = {"blue", "red", "green", "white"};
-	return act_strings[colors];
-}
-
-#if 0
-errors parse_CLI(char *cli_data, CLI *cmd_in)
-{
-    uint32_t pos = 0;
-    uint8_t cntr = 0;
-    char *word = NULL;
-    word = (char *)malloc(sizeof(char) * 15);
-
-    pos = get_word(cli_data, word, *cmd_in, pos);
-    if(!strcmp(word, "show")) {
-        cmd_in->act = show;
-        cmd_in->command = commands;
-        free(word);
-        return SUCCESSFUL;
-    } else if (!strcmp(word, "set")) {
-        pos = get_word(cli_data, word, *cmd_in, pos);
-        cmd_in->act = set;
-        for(cntr = commands ; cntr<= kill_program; cntr++) {
-            if( !strcmp(word, set_CLI_commands(cntr)) ) {
-                cmd_in->command = cntr;
-                pos = get_word(cli_data, word, *cmd_in, pos);
-                set_union_values(cmd_in, word);
-                free(word);
-                return SUCCESSFUL;
-            }
-        }
-        free(word);
-    } else {
-        return INCORRECT_ENTRY;
-    }
-
-    return SUCCESSFUL;
-}
-#endif
-
-errors set_union_values(CLI *cmd_in, char *word)
-{
-	if( cmd_in->command == baudrate ) {
-		cmd_in->u_cmd_value.baudrate = atoi(word);
-	} else if ( cmd_in->command == ledcolor ) {
-		memcpy((cmd_in->color), word, strlen(word));
-	} else if ( cmd_in->command == intensity ) {
-		cmd_in->u_cmd_value.led_intensity = atoi(word);
-	} else {
-		free(word);
-		return INCORRECT_ENTRY;
-	}
-
-	return SUCCESSFUL;
-}
-
-uint32_t get_word(char *cli_data, char* ret_word, CLI cmd_in, uint32_t pos)
-{
-	uint8_t i = 0;
-	while( (*(cli_data+pos+1) != 0x20) && (pos != cmd_in.cmd_length) ) {
-		*(ret_word+i) = *(cli_data + pos +1);
-		*(ret_word+i+1) = '\0';
-		pos++;
-		i++;
-	}
-	return (pos+1);
-}
-
-errors act_on_CLI_command(CLI *cmd_in)
-{
-	switch(cmd_in->act)
-	{
-		case show:
-					switch(cmd_in->command)
-					{
-						case commands: /*Show the list of possible commands*/
-										MY_LOG("set baudrate <baud rate>\n");
-										MY_LOG("set led_color <blue|green|red|white>\n");
-										MY_LOG("set led_intensity <intensity>\n");
-										MY_LOG("set kill_program!\n");
-										break;
-					}
-					break;
-		case set:
-					switch(cmd_in->command)
-					{
-						case baudrate: /*Set the Baudrate of the Board*/
-										break;
-						case ledcolor: /*Set the Led Color*/
-										init_uart();
-										config_receive();
-										config_leds();
-
-										ledcolors cntr;
-										if ( !strcmp(cmd_in->color, "blue") ) {
-											turn_on_leds(blue);
-											break;
-										} else if (!strcmp(cmd_in->color, "red")) {
-											turn_on_leds(red);
-											break;
-										} else if (!strcmp(cmd_in->color, "green")) {
-											turn_on_leds(green);
-											break;
-										} else if (!strcmp(cmd_in->color, "white")) {
-											turn_on_leds(white);
-											break;
-										} else {
-											return INCORRECT_ENTRY;
-										}
-										break;
-						case intensity: /*Set the Led Intensity*/
-										break;
-
-					}
-	}
-
-	return SUCCESSFUL;
-}
-
-#endif
 

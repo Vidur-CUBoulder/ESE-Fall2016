@@ -20,15 +20,18 @@
 #include "nRF.h"
 
 #define UART_STOP_BYTE 0x23
+#define MAX_DATA_LENGTH 20
 
-#define CLI_PARSER
+static uint8_t is_nrf_setup = 0;
 
 typedef enum cmds_t {
-	commands 	= 0,
-	baudrate 	= 1,
-	ledcolor 	= 2,
-	intensity 	= 3,
-	kill_program 	= 4
+	ledcolor 	        = 0x10,
+        nRF_Setup               = 0x20,
+        nRF_Payload_Setup       = 0x21,
+        nRF_Start_Comm          = 0x22,
+        nRF_Read_RX_Payload     = 0x23,
+        read_temp_sensor        = 0x30,
+        kill_program            = 0xFF
 } cmds;
 
 #ifdef CLI_PARSER
@@ -55,23 +58,9 @@ typedef enum ledcolors_t {
 } ledcolors;
 
 typedef struct classify_CLI {
-
-#ifdef CLI_PARSER
-	action act;
-#endif
-	cmds command;
-	uint8_t cmd_length;
-#ifdef CLI_PARSER
-	char color[8];
-
-	union {
-		uint32_t baudrate;
-		uint8_t led_intensity;
-		uint8_t kill_program;
-	} u_cmd_value;
-#endif
-	uint8_t data[10];
-	uint8_t checksum[2];
+    cmds command;
+    uint8_t cmd_length;
+    uint8_t data[MAX_DATA_LENGTH];
 } CLI;
 
 /* Function Prototypes */
@@ -101,7 +90,7 @@ errors parse_CLI(char *str_data, CLI *command_in);
  * Description: perform an action based on what data has been stored
  * in the CLI data struct.
  */
-errors act_on_command(CLI *command_in);
+errors act_on_command(CLI *command_in, nRF_Cluster *, nRF_Values *, nRF_Values *);
 
 /*Function: errors flectchers_checksum(CLI cmd)
  * Parameters:
@@ -120,12 +109,13 @@ checksum fletchers_checksum(CLI cmd);
  */
 errors modify_intensity(ledcolors color);
 
+errors parse_CLI_First(char *str_data, CLI *command_in);
 
 #ifdef CLI_PARSER
 
 errors set_union_values(CLI *cmd_in, char *word);
 
-errors get_CLI(char *str_data/*, uint32_t *len*/);
+errors get_CLI(char *str_data, uint8_t *len);
 
 static char *set_CLI_commands(cmds command);
 

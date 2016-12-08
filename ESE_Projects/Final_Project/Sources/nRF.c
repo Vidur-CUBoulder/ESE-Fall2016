@@ -188,8 +188,8 @@ errors Read_Payload_Register_Value(void *spi, nRF_Cluster *new_cluster, uint8_t 
     new_cluster->Dump_Register_Values(SPI1);
    
     /* Read the data from the RX Buffer */
-    uint8_t data_read[4] = {0};
-    Read_RX_Payload(spi, &data_read[0], len);
+    //uint8_t data_read[4] = {0};
+    Read_RX_Payload(spi, data, len);
     
     return 0;
 }
